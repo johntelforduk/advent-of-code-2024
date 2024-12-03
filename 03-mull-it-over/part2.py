@@ -4,21 +4,27 @@
 from icecream import ic
 import re
 
-with open('test.txt', 'r') as file:
+with open('input.txt', 'r') as file:
     memory = file.read()
 
 total = 0
-
-matches = [(m.group(), m.start(), m.end()) for m in re.finditer(r'mul\(\d+,\d+\)', memory)]
+do = True
+matches = [(m.group()) for m in re.finditer(r"mul\(\d+,\d+\)|do\(\)|don't\(\)", memory)]
 ic(matches)
 
+for i in matches:
+    ic(i)
+    if i == "do()":
+        do = True
+    elif i == "don't()":
+        do = False
+    elif do:
+        ic(do, i)
 
-# for i in instructions:
-#     ic(i)
-#     terms = re.findall(r'\d+', i)
-#     x = 1
-#     for t in terms:
-#         x *= int(t)
-#     total += x
+        terms = re.findall(r'\d+', i)
+        x = 1
+        for t in terms:
+            x *= int(t)
+        total += x
 
 ic(total)
