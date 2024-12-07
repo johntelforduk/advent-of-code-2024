@@ -4,7 +4,7 @@
 from icecream import ic
 
 
-def solvable(target: int, so_far, terms: list, bread: str) -> bool:
+def solvable(target: int, so_far, terms: list, bread: str, start: bool) -> bool:
     # ic(target, so_far, terms)
     if not terms:
         if target == so_far:
@@ -16,12 +16,17 @@ def solvable(target: int, so_far, terms: list, bread: str) -> bool:
     new_terms = terms.copy()
     next_term = new_terms.pop(0)
     success = False
-    for op in '+*':
+    if start:
+        available_ops = '+'
+    else:
+        available_ops = '+*'
+
+    for op in available_ops:
         new = eval(f'{so_far} {op} {next_term}')
         new_bread = bread + f' {op} {next_term}'
         # ic(op, next_term, new)
 
-        if solvable(target, new, new_terms, new_bread):
+        if solvable(target, new, new_terms, new_bread, False):
             success = True
 
     if success:
@@ -37,7 +42,8 @@ for line in operators.split('\n'):
     target_str, terms_str = line.split(': ')
     target = int(target_str)
     terms = [int(t) for t in terms_str.split(' ')]
-    if solvable(target, 0, terms, ''):
+    if solvable(target=target, so_far=0, terms=terms, bread='', start=True):
+    # if solvable(target, 0, terms, bread='', first=True):
         part1 += target
         ic(part1, target, terms)
 
