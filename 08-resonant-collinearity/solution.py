@@ -4,17 +4,7 @@
 from icecream import ic
 import itertools
 
-
-def distance(v1: tuple, v2: tuple) -> int:
-    x1, y1 = v1
-    x2, y2 = v2
-    return abs(x1 - x2) + abs(y1 - y2)
-
-
-assert distance((4,3), (5, 5)) == 3
-
-
-with open('test1.txt', 'r') as file:
+with open('input.txt', 'r') as file:
     antennas_str = file.read()
 
 my = 0
@@ -32,20 +22,22 @@ for line in antennas_str.split('\n'):
 
 ic(antennas, mx, my)
 
+antinodes = set()
+for frequency in antennas:
+    locations = antennas[frequency]
+    for loc1, loc2 in itertools.combinations(locations, 2):
+        x1, y1 = loc1
+        x2, y2 = loc2
+        xd = x2 - x1        # Calculate deltas.
+        yd = y2 - y1
 
-# distances = {}
+        ic(loc1, loc2, xd, yd)
 
+        candidates = [(x1 - xd, y1 - yd)]
+        candidates.append((x2 + xd, y2 + yd))
+        ic(frequency, loc1, loc2, xd, yd, candidates)
+        for x, y in candidates:                 # Check if candidates are in range of the map.
+            if x >= 0 and x < mx and y >= 0 and y < my:
+                antinodes.add((x, y))
 
-for y in range(my):             # Look at every square on the grid.
-    for x in range(mx):
-        for frequency in antennas:
-            # For each antenna, work out how far each square is from it.
-
-            distances = [distance((x, y), antenna) for antenna in antennas[frequency]]
-
-            # Check pairs of distances to see if one of them matches the rule.
-
-            ic(x, y, frequency, distances)
-            for d1, d2 in itertools.combinations(distances, 2):
-                if d1 * 2 == d2 or d2 * 2 == d1:
-                    ic(x, y, frequency, d1, d2)
+ic(len(antinodes))
