@@ -8,10 +8,8 @@ from icecream import ic
 def trailhead(topo: dict, x: int, y: int, nines: set) -> set:
     result = nines.copy()
     height = topo[(x, y)]
-    # ic(x, y, height)
     if height == 9:
         result.add((x, y))
-        # ic(result)
         return result
 
     for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
@@ -49,8 +47,6 @@ for line in topo_str.split('\n'):
         x += 1
     y += 1
 
-# ic(topo)
-# empty = set()
 ic(trail_score(topo))
 
 
