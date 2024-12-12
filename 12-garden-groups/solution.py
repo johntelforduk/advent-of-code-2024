@@ -76,5 +76,47 @@ for x1, y1 in garden:
         if garden[(x1, y1)] != garden[(x1, y2)]:
             h_fence.add((x1, y2))
 
-ic(v_fence, h_fence)
+
+def search(garden: dict,
+           v_fence: set,
+           h_fence: set,
+           x: int,
+           y: int,
+           p_found: set,
+           v_found: set,
+           h_found: set):
+    if (x, y) in p_found:           # We've been here before.
+        return
+    p_found.add((x, y))             # Record that we've been here.
+
+    if (x, y) in v_fence:
+        v_found.add((x, y))
+    else:
+        search(garden, v_fence, h_fence, x - 1, y, p_found,v_found, h_found)
+
+    if (x + 1, y) in v_fence:
+        v_found.add((x + 1, y))
+    else:
+        search(garden, v_fence, h_fence, x + 1, y, p_found,v_found, h_found)
+
+    if (x, y) in h_fence:
+        h_found.add((x, y))
+    else:
+        search(garden, v_fence, h_fence, x, y - 1, p_found,v_found, h_found)
+
+    if (x, y + 1) in h_fence:
+        h_found.add((x, y + 1))
+    else:
+        search(garden, v_fence, h_fence, x, y + 1, p_found,v_found, h_found)
+
+
+
+
+# ic(v_fence, h_fence)
 render(scale=50, mx=mx, my=my, garden=garden, v_fence=v_fence, h_fence=h_fence)
+p_found, v_found, h_found = set(), set(), set()
+
+search(garden, v_fence, h_fence, 0, 0, p_found,v_found, h_found)
+price = len(p_found) * (len(v_found) + len(h_found))
+
+ic(len(p_found), len(v_found), len(h_found), price)
