@@ -5,8 +5,6 @@ from icecream import ic
 import pygame
 import random
 
-with open('test2.txt', 'r') as file:
-    garden_str = file.read()
 
 def render(scale: int, mx, my, garden, v_fence: set, h_fence: set):
     screen_size = [scale * (mx + 2), scale * (my + 2)]  # [width, height]
@@ -20,19 +18,29 @@ def render(scale: int, mx, my, garden, v_fence: set, h_fence: set):
     for x, y in garden:
         plant = garden[(x, y)]
         if plant not in colours:
-            colours[plant] = (2 * random.randint(0, 120), 2 * random.randint(0, 120), 2 * random.randint(0, 120))
-        pygame.draw.rect(screen, colours[plant], pygame.Rect((x + 1.15) * scale, (y + 1.15) * scale, scale * 0.7, scale * 0.7))
+            colours[plant] = (2 * random.randint(0, 120),
+                              2 * random.randint(0, 120),
+                              2 * random.randint(0, 120))
+
+        pygame.draw.rect(screen, colours[plant],
+                         pygame.Rect((x + 1.15) * scale,
+                                     (y + 1.15) * scale,
+                                     scale * 0.7, scale * 0.7))
 
     for x, y in v_fence:
-        pygame.draw.rect(screen, fence_colour, pygame.Rect((0.85 + x) * scale, (1 + y) * scale, scale * 0.3, scale * 1.0))
+        pygame.draw.rect(screen, fence_colour,
+                         pygame.Rect((0.85 + x) * scale, (1 + y) * scale, scale * 0.3, scale * 1.0))
     for x, y in h_fence:
-        pygame.draw.rect(screen, fence_colour, pygame.Rect((1 + x) * scale, (0.85 + y) * scale, scale * 1.0, scale * 0.3))
-
-
+        pygame.draw.rect(screen, fence_colour,
+                         pygame.Rect((1 + x) * scale, (0.85 + y) * scale, scale * 1.0, scale * 0.3))
 
     screenshot_name = 'screenshots/d11.png'
     pygame.image.save(screen, screenshot_name)
     pygame.display.flip()
+
+
+with open('test2.txt', 'r') as file:
+    garden_str = file.read()
 
 
 garden = {}
@@ -67,7 +75,6 @@ for x1, y1 in garden:
     if (x1, y2) in garden:
         if garden[(x1, y1)] != garden[(x1, y2)]:
             h_fence.add((x1, y2))
-
 
 ic(v_fence, h_fence)
 render(scale=50, mx=mx, my=my, garden=garden, v_fence=v_fence, h_fence=h_fence)
