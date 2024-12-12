@@ -114,9 +114,16 @@ def search(garden: dict,
 
 # ic(v_fence, h_fence)
 render(scale=50, mx=mx, my=my, garden=garden, v_fence=v_fence, h_fence=h_fence)
-p_found, v_found, h_found = set(), set(), set()
+p_found_ever = set()
 
-search(garden, v_fence, h_fence, 0, 0, p_found,v_found, h_found)
-price = len(p_found) * (len(v_found) + len(h_found))
-
-ic(len(p_found), len(v_found), len(h_found), price)
+part1 = 0
+for x, y in garden:
+    if (x, y) not in p_found_ever:
+        p_found, v_found, h_found = set(), set(), set()
+        search(garden, v_fence, h_fence, x, y, p_found,v_found, h_found)
+        p_found_ever.update(p_found)
+        price = len(p_found) * (len(v_found) + len(h_found))
+        # ic(x, y, len(p_found), len(v_found), len(h_found), price)
+        ic(x, y, price, len(p_found_ever))
+        part1 += price
+ic(part1)
