@@ -5,7 +5,7 @@ from icecream import ic
 import pygame
 import random
 
-with open('input.txt', 'r') as file:
+with open('test2.txt', 'r') as file:
     garden_str = file.read()
 
 def render(scale: int, mx, my, garden, v_fence: set, h_fence: set):
@@ -49,23 +49,25 @@ ic(mx, my)
 
 # Like a computer graphics edge detection algorithm...
 v_fence, h_fence = set(), set()
-for x, y in garden:
-    # Check for horizontal boundaries '|'.
-    if (x - 1, y) not in garden:
-        v_fence.add((x, y))
-    elif (x + 1, y) not in garden:
-        v_fence.add((x + 1, y))
-    elif garden[(x - 1, y)] != garden[(x, y)]:
-        v_fence.add((x, y))
+for y in range(my):
+    v_fence.add((0, y))
+    v_fence.add((mx, y))
 
-    if (x, y - 1) not in garden:
-        h_fence.add((x, y))
-    elif (x, y + 1) not in garden:
-        h_fence.add((x, y + 1))
-    elif garden[(x, y - 1)] != garden[(x, y)]:
-        h_fence.add((x, y))
+for x in range(mx):
+    h_fence.add((x, 0))
+    h_fence.add((x, my))
 
+for x1, y1 in garden:
+    x2 = x1 + 1
+    if (x2, y1) in garden:
+        if garden[(x1, y1)] != garden[(x2, y1)]:
+            v_fence.add((x2, y1))
+
+    y2 = y1 + 1
+    if (x1, y2) in garden:
+        if garden[(x1, y1)] != garden[(x1, y2)]:
+            h_fence.add((x1, y2))
 
 
 ic(v_fence, h_fence)
-render(scale=10, mx=mx, my=my, garden=garden, v_fence=v_fence, h_fence=h_fence)
+render(scale=50, mx=mx, my=my, garden=garden, v_fence=v_fence, h_fence=h_fence)
