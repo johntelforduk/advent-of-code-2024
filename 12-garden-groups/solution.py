@@ -34,7 +34,7 @@ def render(scale: int, mx, my, garden, v_fence: set, h_fence: set):
         pygame.draw.rect(screen, fence_colour,
                          pygame.Rect((1 + x) * scale, (0.85 + y) * scale, scale * 1.0, scale * 0.3))
 
-    screenshot_name = 'screenshots/d11.png'
+    screenshot_name = 'screenshots/d12.png'
     pygame.image.save(screen, screenshot_name)
     pygame.display.flip()
 
@@ -85,25 +85,31 @@ def corners(p_found: set) -> int:
         for check in [{False: [(-1, 0), (0, -1)]},  # These are the internal corners.
                       {False: [(0, -1), (1, 0)]},
                       {False: [(1, 0), (0, 1)]},
-                      {False: [(0, 1), (-1, 0)]}]:
+                      {False: [(0, 1), (-1, 0)]},
 
+                        # These are the external corners.
+                      {False: [(-1, -1)], True: [(-1, 0), (0, -1)]},
+                      {False: [(1, -1)], True: [(0, -1), (1, 0)]},
+                      {False: [(1, 1)], True: [(1, 0), (0, 1)]},
+                      {False: [(-1, 1)], True: [(-1, 0), (0, 1)]}
+                      ]:
+
+            corner = True
             for condition in check:
-                corner = True
                 # ic(x, y, condition, check[condition])
                 for xd, yd in check[condition]:
                     if condition and (x + xd, y + yd) not in p_found:
                         corner = False
-                    elif not condition and (x + xd, y + yd) in p_found:
+                    if not condition and (x + xd, y + yd) in p_found:
                         corner = False
-                if corner:
-                    this_count += 1
-        if this_count != 0:
-            ic(x, y, this_count)
+            if corner:
+                # ic(x, y, check)
+                this_count += 1
         count += this_count
     return count
 
 
-with open('test4.txt', 'r') as file:
+with open('input.txt', 'r') as file:
     garden_str = file.read()
 
 
@@ -148,12 +154,9 @@ for x, y in garden:
         p_found_ever.update(p_found)
 
         price1 = len(p_found) * (len(v_found) + len(h_found))
-
-        corn = corners(p_found)
-        price2 = len(p_found) * corn
-        ic(x, y, len(p_found), corn)
+        price2 = len(p_found) * corners(p_found)
 
         part1 += price1
         part2 += price2
 
-ic(part1, part2)
+        ic(x, y, part1, part2)
