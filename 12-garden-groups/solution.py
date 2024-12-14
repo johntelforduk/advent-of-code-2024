@@ -1,4 +1,4 @@
-# Advent of code day 11, Plutonian Pebbles.
+# Advent of code day 12, Garden Groups.
 # https://adventofcode.com/2024/day/11
 
 from icecream import ic
@@ -39,44 +39,6 @@ def render(scale: int, mx, my, garden, v_fence: set, h_fence: set):
     pygame.display.flip()
 
 
-with open('test2.txt', 'r') as file:
-    garden_str = file.read()
-
-
-garden = {}
-my = 0
-for row in garden_str.split('\n'):
-    mx = 0
-    for p in row:
-        garden[(mx, my)] = p
-        mx += 1
-    my += 1
-
-ic(garden)
-ic(mx, my)
-
-# Like a computer graphics edge detection algorithm...
-v_fence, h_fence = set(), set()
-for y in range(my):
-    v_fence.add((0, y))
-    v_fence.add((mx, y))
-
-for x in range(mx):
-    h_fence.add((x, 0))
-    h_fence.add((x, my))
-
-for x1, y1 in garden:
-    x2 = x1 + 1
-    if (x2, y1) in garden:
-        if garden[(x1, y1)] != garden[(x2, y1)]:
-            v_fence.add((x2, y1))
-
-    y2 = y1 + 1
-    if (x1, y2) in garden:
-        if garden[(x1, y1)] != garden[(x1, y2)]:
-            h_fence.add((x1, y2))
-
-
 def search(garden: dict,
            v_fence: set,
            h_fence: set,
@@ -110,20 +72,88 @@ def search(garden: dict,
         search(garden, v_fence, h_fence, x, y + 1, p_found,v_found, h_found)
 
 
+def rem_if_present(s: set, k):
+    if k in s:
+        s.remove(k)
 
 
-# ic(v_fence, h_fence)
-render(scale=50, mx=mx, my=my, garden=garden, v_fence=v_fence, h_fence=h_fence)
+def corners(p_found: set) -> int:
+    count = 0
+    for x, y in p_found:
+        this_count = 0
+
+        for check in [{False: [(-1, 0), (0, -1)]},  # These are the internal corners.
+                      {False: [(0, -1), (1, 0)]},
+                      {False: [(1, 0), (0, 1)]},
+                      {False: [(0, 1), (-1, 0)]}]:
+
+            for condition in check:
+                corner = True
+                # ic(x, y, condition, check[condition])
+                for xd, yd in check[condition]:
+                    if condition and (x + xd, y + yd) not in p_found:
+                        corner = False
+                    elif not condition and (x + xd, y + yd) in p_found:
+                        corner = False
+                if corner:
+                    this_count += 1
+        if this_count != 0:
+            ic(x, y, this_count)
+        count += this_count
+    return count
+
+
+with open('test4.txt', 'r') as file:
+    garden_str = file.read()
+
+
+garden = {}
+my = 0
+for row in garden_str.split('\n'):
+    mx = 0
+    for p in row:
+        garden[(mx, my)] = p
+        mx += 1
+    my += 1
+
+# Like a computer graphics edge detection algorithm...
+v_fence, h_fence = set(), set()
+for y in range(my):
+    v_fence.add((0, y))
+    v_fence.add((mx, y))
+
+for x in range(mx):
+    h_fence.add((x, 0))
+    h_fence.add((x, my))
+
+for x1, y1 in garden:
+    x2 = x1 + 1
+    if (x2, y1) in garden:
+        if garden[(x1, y1)] != garden[(x2, y1)]:
+            v_fence.add((x2, y1))
+
+    y2 = y1 + 1
+    if (x1, y2) in garden:
+        if garden[(x1, y1)] != garden[(x1, y2)]:
+            h_fence.add((x1, y2))
+
+render(scale=10, mx=mx, my=my, garden=garden, v_fence=v_fence, h_fence=h_fence)
 p_found_ever = set()
 
-part1 = 0
+part1, part2 = 0, 0
 for x, y in garden:
     if (x, y) not in p_found_ever:
         p_found, v_found, h_found = set(), set(), set()
         search(garden, v_fence, h_fence, x, y, p_found,v_found, h_found)
         p_found_ever.update(p_found)
-        price = len(p_found) * (len(v_found) + len(h_found))
-        # ic(x, y, len(p_found), len(v_found), len(h_found), price)
-        ic(x, y, price, len(p_found_ever))
-        part1 += price
-ic(part1)
+
+        price1 = len(p_found) * (len(v_found) + len(h_found))
+
+        corn = corners(p_found)
+        price2 = len(p_found) * corn
+        ic(x, y, len(p_found), corn)
+
+        part1 += price1
+        part2 += price2
+
+ic(part1, part2)
