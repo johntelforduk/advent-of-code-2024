@@ -5,6 +5,8 @@ Solutions to AOC puzzles.
 
 ```commandline
 pip install icecream
+pip install pygame
+pip install sympy
 ```
 
 ### Day 10: Hoof It
