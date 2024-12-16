@@ -3,11 +3,6 @@
 
 from icecream import ic
 
-with open('input.txt', 'r') as file:
-    input_str = file.read()
-
-warehouse_str, moves_str = input_str.split('\n\n')
-
 
 def render(wh: dict, rx: int, ry: int, mx: int, my: int):
     for y in range(my):
@@ -19,19 +14,6 @@ def render(wh: dict, rx: int, ry: int, mx: int, my: int):
         print()
     print()
 
-
-wh = {}
-my = 0
-for line in warehouse_str.split('\n'):
-    mx = 0
-    for tile in line:
-        if tile == '@':
-            rx, ry = mx, my
-            wh[(mx, my)] = '.'
-        else:
-            wh[(mx, my)] = tile
-        mx += 1
-    my += 1
 
 
 def blocked(wh, rx, ry, dx, dy) -> bool:
@@ -64,7 +46,25 @@ def gps_calc(wh: dict) -> int:
             total += x + 100 * y
     return total
 
-# ic(moves_str)
+
+with open('input.txt', 'r') as file:
+    input_str = file.read()
+
+warehouse_str, moves_str = input_str.split('\n\n')
+
+wh = {}
+my = 0
+for line in warehouse_str.split('\n'):
+    mx = 0
+    for tile in line:
+        if tile == '@':
+            rx, ry = mx, my
+            wh[(mx, my)] = '.'
+        else:
+            wh[(mx, my)] = tile
+        mx += 1
+    my += 1
+
 render(wh, rx, ry, mx, my)
 
 deltas = {'>': (1, 0), 'v': (0, 1), '<': (-1, 0), '^': (0, -1)}
@@ -76,9 +76,6 @@ for m in moves_str.replace('\n', ''):
         rx += dx
         ry += dy
     print(m, end='')
-
-
-    # ic(m, dx, dy, blocked(wh, rx, ry, dx, dy))
 
 render(wh, rx, ry, mx, my)
 ic(gps_calc(wh))
