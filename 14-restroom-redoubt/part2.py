@@ -46,6 +46,18 @@ def section(tiles: dict, x, y, xd, yd) -> int:
     return count
 
 
+def adjecent(tiles: dict) -> bool:
+    for x, y in tiles:
+        neighbors = 0
+        for dy in range(-1, 2):
+            for dx in range(-1, 2):
+                if (x + dx, y + dy) in tiles:
+                    neighbors += 1
+        if neighbors == 9:
+            return True
+    return False
+
+
 robots = []
 for line in robots_str.split('\n'):
     p_str, v_str = line.split(' ')
@@ -55,16 +67,16 @@ for line in robots_str.split('\n'):
     robot = {'x': x, 'y': y, 'vx': vx, 'vy': vy}
     robots.append(robot)
 
-# ic(robots)
 tiles = count(robots)
-# ic(c)
 w, h = 101, 103
-render(tiles=tiles, width=w, height=h)
 
 i = 0
 tree = False
 while not tree :
     i += 1
+    if i % 100 == 0:
+        ic(i)
+
     new_robots = []
     for r in robots:
         x = (r['x'] + r['vx']) % w
@@ -74,19 +86,7 @@ while not tree :
     robots = new_robots
 
     tiles = count(robots)
-
-    quads = {}
-    for x, y in tiles:
-        q = quadrant(x=x, y=y, width=w, height=h)
-        if q is not None:
-            if q not in quads:
-                quads[q] = tiles[(x, y)]
-            else:
-                quads[q] += tiles[(x, y)]
-
-    nw, ne, sw, se = quads[True, True], quads[False, True], quads[True, False], quads[False, False]
-    s = section(tiles=tiles, x=0, y=0, xd=10, yd=10)
-    if nw == ne and sw == se and s == 0:
-        ic(i, nw, ne, sw, se, s)
+    if adjecent(tiles):
+        print(i)
         render(tiles=tiles, width=w, height=h)
-
+        tree = True
