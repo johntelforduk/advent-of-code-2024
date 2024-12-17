@@ -61,14 +61,6 @@ def pushable(wh:dict, tree:dict, dy: int) -> bool:
     return True
 
 
-
-    # for x, y in tree:
-    #     if wh[(x, y + dx)] != '.' and (x, y + dx) not in tree:
-    #         return False
-    #     return True
-    #
-
-
 def push_vertical(wh:dict, tree:dict, dy: int) -> bool:
     """For parm set that contains a connected tree of boxes, and parm direction of travel (-1 or 1),
     move the boxes 1 space in that direction."""
@@ -111,8 +103,6 @@ def push_horizontal(wh:dict, rx, ry, dx: int) -> bool:
         boxes[(x, ry)] = wh[(x, ry)]
         x += dx
 
-    # ic(boxes)
-
     # Everywhere the boxes used to be becomes space.
     for x, y in boxes:
         wh[(x, y)] = '.'
@@ -149,10 +139,8 @@ for line in warehouse_str.split('\n'):
         mx += 2
     my += 1
 
-
 render(wh, rx, ry, mx, my)
 
-i = 1
 deltas = {'>': (1, 0), 'v': (0, 1), '<': (-1, 0), '^': (0, -1)}
 for m in moves_str.replace('\n', ''):
     dx, dy = deltas[m]
@@ -167,63 +155,10 @@ for m in moves_str.replace('\n', ''):
             if push_horizontal(wh, rx, ry, dx):
                 rx += dx
         else:                   # Vertical move.
-
             tree = tree_of_boxes(wh, rx, ry + dy, dy)
-            # ic(tree)
             if pushable(wh,tree, dy):
                 push_vertical(wh, tree, dy)
                 ry += dy
 
-    if i in [979, 980]:
-        print(i, m)
-        render(wh, rx, ry, mx, my)
-
-    # hash = 0
-    # for x, y in wh:
-    #     if wh[(x, y)] == '#':
-    #         hash += 1
-    # ic(i, hash)
-    i += 1
-
-print()
 render(wh, rx, ry, mx, my)
 ic(gps_calc(wh))
-
-#     if not blocked(wh, rx, ry, dx, dy):
-#         push(wh, rx, ry, dx, dy)
-#         rx += dx
-#         ry += dy
-#     print(m, end='')
-#
-# render(wh, rx, ry, mx, my)
-# ic(gps_calc(wh))
-
-
-
-
-
-
-
-# rx, ry = 8, 4
-# dy = -1
-# render(wh, rx, ry, mx, my)
-# ic(rx, ry, dy)
-#
-# tree = tree_of_boxes(wh, rx, ry + dy, dy)
-# ic(tree)
-# ic(pushable(wh,tree, dy))
-#
-# push_vertical(wh, tree, dy)
-# render(wh, rx, ry, mx, my)
-#
-#
-# push_horizontal(wh,rx,ry, -1)
-# render(wh, rx, ry, mx, my)
-#
-# rx, ry = 5, 5
-# render(wh, rx, ry, mx, my)
-# tree = tree_of_boxes(wh, rx, ry + dy, dy)
-# ic(pushable(wh,tree, dy))
-# push_vertical(wh, tree, dy)
-# render(wh, rx, ry, mx, my)
-#
