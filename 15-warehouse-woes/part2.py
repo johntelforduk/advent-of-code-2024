@@ -79,13 +79,14 @@ def blocked(wh, rx, ry, dx, dy) -> bool:
         if wh[(rx, ry)] == '.':     # Found (at least) 1x gap, so robot is not blocked.
             return False
     return True                     # We reached a wall without finding a ',' so robot is blocked.
-#
-# def gps_calc(wh: dict) -> int:
-#     total = 0
-#     for x, y in wh:
-#         if wh[(x, y)] == 'O':
-#             total += x + 100 * y
-#     return total
+
+
+def gps_calc(wh: dict) -> int:
+    total = 0
+    for x, y in wh:
+        if wh[(x, y)] == '[':
+            total += x + 100 * y
+    return total
 
 
 def push_horizontal(wh:dict, rx, ry, dx: int) -> bool:
@@ -112,7 +113,7 @@ def push_horizontal(wh:dict, rx, ry, dx: int) -> bool:
     return True             # Robot able to move.
 
 
-with open('test3.txt', 'r') as file:
+with open('input.txt', 'r') as file:
     input_str = file.read()
 
 warehouse_str, moves_str = input_str.split('\n\n')
@@ -147,21 +148,25 @@ for m in moves_str.replace('\n', ''):
     if wh[(rx + dx, ry + dy)] == '.':   # Move into space.
         rx += dx
         ry += dy
+    elif wh[(rx + dx, ry + dy)] == '#': # Hit a wall.
+        pass
     else:
         if dx != 0:           # Horizontal move.
             if push_horizontal(wh, rx, ry, dx):
                 rx += dx
         else:                   # Vertical move.
+
             tree = tree_of_boxes(wh, rx, ry + dy, dy)
             # ic(tree)
             if pushable(wh,tree, dy):
                 push_vertical(wh, tree, dy)
                 ry += dy
 
-    print(m)
-    render(wh, rx, ry, mx, my)
+    print(m, end='')
 
-
+print()
+render(wh, rx, ry, mx, my)
+ic(gps_calc(wh))
 
 #     if not blocked(wh, rx, ry, dx, dy):
 #         push(wh, rx, ry, dx, dy)
