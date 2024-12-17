@@ -51,11 +51,22 @@ def pushable(wh:dict, tree:dict, dy: int) -> bool:
                 min_max[x] = min(min_max[x], y)
             else:
                 min_max[x] = max(min_max[x], y)
+        if wh[(x, y + dy)] == '#':
+            return False
 
     for x in min_max:
         if wh[(x, min_max[x] + dy)] != '.':
             return False
+
     return True
+
+
+
+    # for x, y in tree:
+    #     if wh[(x, y + dx)] != '.' and (x, y + dx) not in tree:
+    #         return False
+    #     return True
+    #
 
 
 def push_vertical(wh:dict, tree:dict, dy: int) -> bool:
@@ -141,6 +152,7 @@ for line in warehouse_str.split('\n'):
 
 render(wh, rx, ry, mx, my)
 
+i = 1
 deltas = {'>': (1, 0), 'v': (0, 1), '<': (-1, 0), '^': (0, -1)}
 for m in moves_str.replace('\n', ''):
     dx, dy = deltas[m]
@@ -162,7 +174,16 @@ for m in moves_str.replace('\n', ''):
                 push_vertical(wh, tree, dy)
                 ry += dy
 
-    print(m, end='')
+    if i in [979, 980]:
+        print(i, m)
+        render(wh, rx, ry, mx, my)
+
+    # hash = 0
+    # for x, y in wh:
+    #     if wh[(x, y)] == '#':
+    #         hash += 1
+    # ic(i, hash)
+    i += 1
 
 print()
 render(wh, rx, ry, mx, my)
