@@ -15,31 +15,31 @@ def render(wh: dict, rx: int, ry: int, mx: int, my: int):
     print()
 
 
-def tree_of_boxes(wh, rx, ry, dy) -> set:
+def tree_of_boxes(wh, rx, ry, dy) -> dict:
     """For parm (x, y) location and vertical direction of travel (-1 or 1),
     return a set of locations that want to move in that direction if pushed."""
 
     # We've reached either a wall or a space. Either way, it the end of the search.
     if wh[rx, ry] not in '[]':
-        return set()
+        return {}
     pass
 
-    new_boxes = set()
-    new_boxes.add((rx, ry))    # Current position must be a part of a box.
+    new_boxes = {}
+    new_boxes[(rx, ry)] = wh[(rx, ry)]    # Current position must be a part of a box.
     new_boxes.update(tree_of_boxes(wh, rx, ry + dy, dy))  # Search onward from this part of the box.
 
     # Search onwards from other part of box.
     if wh[rx, ry] == '[':
-        new_boxes.add((rx + 1, ry))
-        new_boxes.union(tree_of_boxes(wh, rx + 1, ry + dy, dy))
+        new_boxes[(rx + 1, ry)] = wh[(rx + 1, ry)]
+        new_boxes.update(tree_of_boxes(wh, rx + 1, ry + dy, dy))
     else:                               # Must be a ']' part of box.
-        new_boxes.add((rx - 1, ry))
-        new_boxes.union(tree_of_boxes(wh, rx - 1, ry + dy, dy))
+        new_boxes[(rx - 1, ry)] = wh[(rx - 1, ry)]
+        new_boxes.update(tree_of_boxes(wh, rx - 1, ry + dy, dy))
 
     return new_boxes
 
 
-def pushable(wh:dict, tree:set, dy: int) -> bool:
+def pushable(wh:dict, tree:dict, dy: int) -> bool:
     """For parm set that contains a connected tree of boxes, and parm direction of travel (-1 or 1),
      return True if it can be moved 1 space in that direction, otherwise return False."""
     min_max = {}
@@ -58,7 +58,7 @@ def pushable(wh:dict, tree:set, dy: int) -> bool:
     return True
 
 
-def push(wh:dict, tree:set, dy: int) -> bool:
+def push(wh:dict, tree:dict, dy: int) -> bool:
     """For parm set that contains a connected tree of boxes, and parm direction of travel (-1 or 1),
     move the boxes 1 space in that direction."""
 
@@ -69,7 +69,6 @@ def push(wh:dict, tree:set, dy: int) -> bool:
     # Now put the tree in its new position.
     for x, y in tree:
         wh[(x, y + dy)] = tree[(x, y)]
-
 
 # def blocked(wh, rx, ry, dx, dy) -> bool:
 #     """Blocked if there are zero '.' between the robot and path to wall."""
@@ -153,3 +152,4 @@ ic(tree)
 ic(pushable(wh,tree, dy))
 
 push(wh, tree, dy)
+render(wh, rx, ry, mx, my)
