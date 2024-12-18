@@ -9,22 +9,29 @@ import matplotlib.pyplot as plt
 def render(G):
     pos = nx.random_layout(G)
 
-    subax1 = plt.subplot(111)
     nx.draw(G, pos, with_labels=True)
 
-    # Add edge labels
-    edge_labels = nx.get_edge_attributes(G, 'weight')  # Get the 'weight' attribute for labels
+    edge_labels = nx.get_edge_attributes(G, 'weight')
     nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels)
 
     plt.show()
 
+
+def draw(maze: dict, short: set, mx: int, my: int):
+    for y in range(my):
+        for x in range(mx):
+            if (x, y) in short:
+                print('O', end='')
+            else:
+                print(maze[(x, y)], end='')
+        print()
+    print()
 
 
 with open('input.txt', 'r') as file:
     maze_str = file.read()
 
 maze = {}
-
 my = 0
 for line in maze_str.split('\n'):
     mx = 0
@@ -37,7 +44,7 @@ for line in maze_str.split('\n'):
         mx += 1
     my += 1
 
-G = nx.DiGraph()
+G = nx.DiGraph()        # Directed graph.
 
 turns = {'N': 'WE', 'S': 'WE', 'E': 'NS', 'W': 'NS'}
 for x, y in maze:
@@ -55,61 +62,12 @@ for x, y in maze:
                 cost = 1000
                 G.add_edge((x, y, d1), (x, y, d), weight=cost)
 
-
-# # Add horizontal edges.
-# for y in range(1, my):
-#     inside = False
-#     sx = None
-#     for x in range(mx):
-#         # ic(x, y, maze[(x, y)], inside)
-#         if not inside and maze[(x, y)] in '.SE':
-#             sx = x
-#             inside = True
-#         elif inside:
-#             if maze[(x, y)] == '#':
-#                 if x != sx + 1:         # Just part of a vertical path.
-#                     cost = x - sx
-#                     # ic(start, end, cost)
-#                     G.add_edge((sx, y, 'E'), (x - 1, y, 'E'), weight=cost)
-#                     G.add_edge((x - 1, y, 'W'), (sx, y, 'W'), weight=cost)
-#                 inside = False
-#
-# # Add vertical edges.
-# for x in range(1, mx):
-#     inside = False
-#     sy = None
-#     for y in range(mx):
-#         # ic(x, y, maze[(x, y)], inside)
-#         if not inside and maze[(x, y)] in '.SE':
-#             sy = y
-#             inside = True
-#         elif inside:
-#             if maze[(x, y)] == '#':
-#                 if y != sy + 1:         # Just part of a vertical path.
-#                     cost = y - sy
-#                     ic((x, sy), (x, y - 1), cost)
-#                     G.add_edge((x, sy, 'S'), (x, y - 1, 'S'), weight=cost)
-#                     G.add_edge((x, y - 1, 'N'), (x, sy, 'N'), weight=cost)
-#                 inside = False
-
-#
-# # Add rotation edges.
-# G_copy = G.copy()
-#
-# turns = {'N': 'WE', 'S': 'WE', 'E': 'NS', 'W': 'NS'}
-# for x, y, d in G_copy.nodes:
-#     ic(x, y, d)
-#     for t in turns[d]:
-#         cost = 1000
-#         G.add_edge((x, y, d), (x, y, t), weight=cost)
-
 ic(start_x, start_y, end_x, end_y)
 
-# Define source and target nodes
-
 best = None
+on_short_path = set()
 start = (start_x, start_y, 'E')
-for d in 'NE':                      # Can end with a move that is either travelling N or E.
+for d in 'N':                      # Can end with a move that is either travelling N or E.
     end = (end_x, end_y, d)
     ic(start, end)
     shortest_path_length = nx.shortest_path_length(G, source=start, target=end, weight='weight')
@@ -120,7 +78,17 @@ for d in 'NE':                      # Can end with a move that is either travell
     ic(shortest_path_length)
 
 
+    # Part 2.
+    all_shortest_paths = list(nx.all_shortest_paths(G, source=start, target=end, weight='weight'))
+    # print(f"All shortest paths: {all_shortest_paths}")
+    for a_short_path in all_shortest_paths:
+        # ic(a_short_path)
+        for x, y, _ in a_short_path:
+            on_short_path.add((x, y))
+
 ic(best)
+ic(len(on_short_path))
+# ic(on_short_path)
+# render(G)
 
-
-
+draw(maze,on_short_path, mx, my)
