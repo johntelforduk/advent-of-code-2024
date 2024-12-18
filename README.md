@@ -7,6 +7,8 @@ Solutions to AOC puzzles.
 pip install icecream
 pip install pygame
 pip install sympy
+pip install networkx
+pip install matplotlib
 ```
 
 ### Day 10: Hoof It
