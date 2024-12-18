@@ -21,8 +21,14 @@ Higher locations in lighter green. Trailheads are red. Lighter red means higher 
 
 Small test garden.
 
-![Trails](./12-garden-groups/screenshots/test2.png)
+![Test Garden](./12-garden-groups/screenshots/test2.png)
 
 The puzzle input garden.
 
-![Trails](./12-garden-groups/screenshots/d12.png)
+![Garden](./12-garden-groups/screenshots/d12.png)
+
+### Day 16: Reindeer Maze
+
+Graph that represents topology of first example maze.
+
+![Maze](./16-reindeer-maze/screenshots/d16.png)
