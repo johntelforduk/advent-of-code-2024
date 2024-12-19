@@ -145,7 +145,7 @@ class Computer:
     def run(self):
         self.render()
         # If the computer tries to read an opcode past the end of the program, it instead halts.
-        while self.ip <= len(self.program):
+        while self.ip < len(self.program):
             self.tick()
             self.render()
 
@@ -154,6 +154,3 @@ with open('input.txt', 'r') as file:
 
 c = Computer(input_str)
 c.run()
-# c.render()
-# c.tick()
-# c.render()
