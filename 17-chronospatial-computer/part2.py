@@ -6,24 +6,16 @@ from icecream import ic
 class Computer:
 
     def __init__(self, input_str: str):
-        data_str, prog_str = input_str.split('\n\n')
-
-        for pos, line in enumerate(data_str.split('\n')):
-            pieces = line.split(' ')
-            v = int(pieces[2], 8)
-
-            if 'A' in pieces[1]:
-                self.a = v
-            elif 'B' in pieces[1]:
-                self.b = v
-            else:
-                self.c = v
+        _, prog_str = input_str.split('\n\n')
 
         self.code = [int(n) for n in prog_str.replace('Program: ', '').split(',')]
         self.program = {}
         for a, c in enumerate(self.code):
             self.program[a] = c
 
+        self.a = 0
+        self.b = 0
+        self.c = 0
         self.ip = 0
         self.output = ''
 
@@ -126,10 +118,10 @@ class Computer:
         # The out instruction (opcode 5) calculates the value of its combo operand modulo 8, then outputs that value.
         # (If a program outputs multiple values, they are separated by commas.)
         new_result = str(operand % 8)
-        if self.output == '':
-            self.output = new_result
-        else:
-            self.output = self.output + ',' + new_result
+        # # if self.output == '':
+        #     self.output = new_result
+        # else:
+        self.output += new_result
         return False
 
     def tick(self):
@@ -143,14 +135,83 @@ class Computer:
             self.ip += 2
 
     def run(self):
-        self.render()
+        # self.render()
         # If the computer tries to read an opcode past the end of the program, it instead halts.
         while self.ip < len(self.program):
             self.tick()
-            self.render()
+            # self.render()
+
+    def reset(self):
+        self.a = 0
+        self.b = 0
+        self.c = 0
+        self.ip = 0
+        self.output = ''
+
+
+def search(c:Computer, curr_targ: str, found: str) -> list:
+    ic(curr_targ, found)
+    solutions = []
+
+    for s in range(8 ** (len(curr_targ) - len(found))):
+        c.reset()  # Reset the computer.
+
+        oct_s = oct(s)[2:]
+        a = int(found + oct_s, 8)
+        c.a = a
+        c.run()
+        # ic(s, curr_targ, c.output)
+
+        if c.output == curr_targ:
+            solutions.append(s)
+    return solutions
 
 with open('input.txt', 'r') as file:
     input_str = file.read()
 
+# 303300
+
 c = Computer(input_str)
-c.run()
+found = ''
+target = '2415751643550330'
+current_target = ''
+
+s = search(c=c, curr_targ='0', found='')
+ic(s)   # [3]
+
+s = search(c=c, curr_targ='30', found='3')
+ic(s)       # ic| s: [0, 1, 5, 7]
+
+s = search(c=c, curr_targ='330', found='30')
+ic(s)       # ic| s: [3, 5]
+
+s = search(c=c, curr_targ='0330', found='303')
+ic(s)       # ic| s: [3]
+
+s = search(c=c, curr_targ='50330', found='3033')
+ic(s)       # [0]
+
+s = search(c=c, curr_targ='550330', found='30330')
+ic(s)       # [0, 4, 6, 7]
+
+s = search(c=c, curr_targ='3550330', found='303300')
+ic(s)       # [0, 5]
+
+s = search(c=c, curr_targ='43550330', found='3033000')
+ic(s)       #
+
+
+# while len(target) > 12:                 # TODO Change back to 0!!!
+#     from_end = target[-1]  # Get the last character
+#     target = target[:-1]   # Remove the last character from the string
+#     current_target = from_end + current_target
+#
+#     ic(target, current_target)
+#
+#     s = search(c, current_target, found)
+#
+#     if len(s) != 0:
+#         low_s = oct(s[0])[2:]           # Convert denery int solution to octal and remove the prefix.
+#         found = found + low_s
+#
+# ic(target, current_target, found, int(found, 8))
