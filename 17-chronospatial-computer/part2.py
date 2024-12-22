@@ -174,23 +174,29 @@ def solution(c:Computer, current_target: str, already_found: str) -> list:
 # ic(solution(c=c, current_target='330', already_found='30'))
 # ic(solution(c=c, current_target='330', already_found=''))
 
-def search(c:Computer, remaining_target: str, already_found: str) -> list:
-    ic('start of search func', remaining_target, already_found)
+def search(c:Computer, target: str, already_found: str) -> list:
+    ic('start of search func', target, already_found)
 
-    current_target = already_found + remaining_target[-1]  # Get the last character.
+    # if len(already_found) == 0:
+    #     current_target = target[-1]
+    # else:
+    #     current_target = target][]
+    
+
+    current_target = target[- (len(already_found) + 1):]
     found = solution(c, current_target, already_found)
     ic(found)
     if len(found) == 0:         # This is a dead-end, so give up.
         return []
 
-    new_remaining_target = remaining_target[:-1]  # Remove the last character from the string.
+    # new_remaining_target = target[:-1]  # We found 1 more char, so remove the last character from the string.
 
     output = []
     for f in found:
         new_already_found = already_found + f
-        ic('looping found', new_remaining_target, new_already_found)
+        ic('looping found', target, new_already_found)
 
-        s = search(c, new_remaining_target, new_already_found)
+        s = search(c, target, new_already_found)
         output.extend(s)
     return output
 
@@ -199,12 +205,14 @@ with open('input.txt', 'r') as file:
     input_str = file.read()
 
 c = Computer(input_str)
-s = search(c=c, remaining_target=c.target, already_found='')
+s = search(c=c, target=c.target, already_found='')
 ic(s)
 for each in s:                  # TODO Find the lowest one in the list.
     ic(each, int(each, 8))
 
 ic(solution(c, '30', '3'))
+
+ic(int('3756477014724632', 8))
 
 #
 #     ic(c.target, remaining_target, already_found, current_target)
