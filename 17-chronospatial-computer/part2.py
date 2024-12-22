@@ -174,14 +174,19 @@ def solution(c:Computer, current_target: str, already_found: str) -> list:
 # ic(solution(c=c, current_target='330', already_found='30'))
 # ic(solution(c=c, current_target='330', already_found=''))
 
+RESULTS = []
+
 def search(c:Computer, target: str, already_found: str) -> list:
     ic('start of search func', target, already_found)
 
+    if len(already_found) == len(target):
+        RESULTS.append(already_found)
+        return([already_found])
     # if len(already_found) == 0:
     #     current_target = target[-1]
     # else:
     #     current_target = target][]
-    
+
 
     current_target = target[- (len(already_found) + 1):]
     found = solution(c, current_target, already_found)
@@ -207,12 +212,12 @@ with open('input.txt', 'r') as file:
 c = Computer(input_str)
 s = search(c=c, target=c.target, already_found='')
 ic(s)
-for each in s:                  # TODO Find the lowest one in the list.
+for each in sorted(s):                  # TODO Find the lowest one in the list.
     ic(each, int(each, 8))
 
-ic(solution(c, '30', '3'))
+# ic(solution(c, '30', '3'))
 
-ic(int('3756477014724632', 8))
+# ic(int('3756477014724632', 8))
 
 #
 #     ic(c.target, remaining_target, already_found, current_target)
