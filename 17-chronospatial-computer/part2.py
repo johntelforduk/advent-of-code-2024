@@ -171,30 +171,17 @@ def solution(c:Computer, current_target: str, already_found: str) -> list:
     return solutions
 
 
-# ic(solution(c=c, current_target='330', already_found='30'))
-# ic(solution(c=c, current_target='330', already_found=''))
-
-RESULTS = []
-
 def search(c:Computer, target: str, already_found: str) -> list:
     ic('start of search func', target, already_found)
 
     if len(already_found) == len(target):
-        RESULTS.append(already_found)
         return([already_found])
-    # if len(already_found) == 0:
-    #     current_target = target[-1]
-    # else:
-    #     current_target = target][]
-
 
     current_target = target[- (len(already_found) + 1):]
     found = solution(c, current_target, already_found)
     ic(found)
     if len(found) == 0:         # This is a dead-end, so give up.
         return []
-
-    # new_remaining_target = target[:-1]  # We found 1 more char, so remove the last character from the string.
 
     output = []
     for f in found:
@@ -211,73 +198,6 @@ with open('input.txt', 'r') as file:
 
 c = Computer(input_str)
 s = search(c=c, target=c.target, already_found='')
-ic(s)
-for each in sorted(s):                  # TODO Find the lowest one in the list.
-    ic(each, int(each, 8))
-
-# ic(solution(c, '30', '3'))
-
-# ic(int('3756477014724632', 8))
-
-#
-#     ic(c.target, remaining_target, already_found, current_target)
-#
-# for i in range(14):
-#     ic(c.target, remaining_target, already_found, current_target)
-#
-#     s = solution(c, current_target, already_found)
-#     ic(s)   # [3]
-#
-#     if len(s) != 0:
-#         this = s[0]
-#         already_found += this
-#         int(already_found, 8)
-#
-#     from_end = remaining_target[-1]  # Get the last character.
-#     remaining_target = remaining_target[:-1]  # Remove the last character from the string.
-#     current_target = from_end + current_target
-#
-#     ic(already_found, int(already_found, 8))
-
-# s = search(c, current_target, already_found)
 # ic(s)
-# s = search(c=c, current_target='30', already_found='3')
-# ic(s)       # ic| s: [0, 1, 5, 7]
-
-# s = search(c=c, current_target='330', already_found='30')
-# ic(s)       # ic| s: [3, 5]
-#
-# s = search(c=c, current_target='0330', already_found='303')
-# ic(s)       # ic| s: [3]
-#
-# s = search(c=c, current_target='50330', already_found='3033')
-# ic(s)       # [0]
-#
-# s = search(c=c, current_target='550330', already_found='30330')
-# ic(s)       # [0, 4, 6, 7]
-#
-# s = search(c=c, current_target='3550330', already_found='303300')
-# ic(s)       # [0, 5]
-#
-# s = search(c=c, current_target='43550330', already_found='3033000')
-# ic(s)       # []
-#
-# s = search(c=c, current_target='43550330', already_found='3033000')
-# ic(s)       # []
-#
-
-
-# while len(target) > 12:                 # TODO Change back to 0!!!
-#     from_end = target[-1]  # Get the last character
-#     target = target[:-1]   # Remove the last character from the string
-#     current_target = from_end + current_target
-#
-#     ic(target, current_target)
-#
-#     s = search(c, current_target, found)
-#
-#     if len(s) != 0:
-#         low_s = oct(s[0])[2:]           # Convert denery int solution to octal and remove the prefix.
-#         found = found + low_s
-#
-# ic(target, current_target, found, int(found, 8))
+for each in sorted(s):
+    ic(each, int(each, 8))
