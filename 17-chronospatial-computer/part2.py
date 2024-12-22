@@ -151,9 +151,11 @@ class Computer:
         self.output = ''
 
 
-def search(c:Computer, current_target: str, already_found: str) -> list:
+def solution(c:Computer, current_target: str, already_found: str) -> list:
     # For example, curr_targ: '50330', found: '3033'.
     # ic(current_target, already_found)
+    ic('start of function solution', current_target, already_found)
+
     solutions = []
 
     for s in range(8 ** (len(current_target) - len(already_found))):
@@ -165,40 +167,64 @@ def search(c:Computer, current_target: str, already_found: str) -> list:
         c.run()
 
         if c.output == current_target:
-            solutions.append(str(s))
+            solutions.append(oct(s)[2:])
     return solutions
+
+
+# ic(solution(c=c, current_target='330', already_found='30'))
+# ic(solution(c=c, current_target='330', already_found=''))
+
+def search(c:Computer, remaining_target: str, already_found: str) -> list:
+    ic('start of search func', remaining_target, already_found)
+
+    current_target = already_found + remaining_target[-1]  # Get the last character.
+    found = solution(c, current_target, already_found)
+    ic(found)
+    if len(found) == 0:         # This is a dead-end, so give up.
+        return []
+
+    new_remaining_target = remaining_target[:-1]  # Remove the last character from the string.
+
+    output = []
+    for f in found:
+        new_already_found = already_found + f
+        ic('looping found', new_remaining_target, new_already_found)
+
+        s = search(c, new_remaining_target, new_already_found)
+        output.extend(s)
+    return output
 
 
 with open('input.txt', 'r') as file:
     input_str = file.read()
 
 c = Computer(input_str)
-already_found = ''
-remaining_target = c.target
-current_target = ''
+s = search(c=c, remaining_target=c.target, already_found='')
+ic(s)
+for each in s:                  # TODO Find the lowest one in the list.
+    ic(each, int(each, 8))
 
-from_end = remaining_target[-1]                 # Get the last character.
-remaining_target = remaining_target[:-1]        # Remove the last character from the string.
-current_target = from_end + current_target
+ic(solution(c, '30', '3'))
 
-ic(c.target, remaining_target, already_found, current_target)
-
-for i in range(20):
-    s = search(c, current_target, already_found)
-    ic(s)   # [3]
-
-    if len(s) != 0:
-        this = s[0]
-        already_found += this
-        from_end = remaining_target[-1]  # Get the last character.
-        remaining_target = remaining_target[:-1]  # Remove the last character from the string.
-        current_target = from_end + current_target
-
-        ic(c.target, remaining_target, already_found, current_target)
-    else:
-        pass
-    
-ic(already_found, int(already_found, 8))
+#
+#     ic(c.target, remaining_target, already_found, current_target)
+#
+# for i in range(14):
+#     ic(c.target, remaining_target, already_found, current_target)
+#
+#     s = solution(c, current_target, already_found)
+#     ic(s)   # [3]
+#
+#     if len(s) != 0:
+#         this = s[0]
+#         already_found += this
+#         int(already_found, 8)
+#
+#     from_end = remaining_target[-1]  # Get the last character.
+#     remaining_target = remaining_target[:-1]  # Remove the last character from the string.
+#     current_target = from_end + current_target
+#
+#     ic(already_found, int(already_found, 8))
 
 # s = search(c, current_target, already_found)
 # ic(s)
