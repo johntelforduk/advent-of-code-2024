@@ -10,8 +10,10 @@ class Computer:
 
         self.code = [int(n) for n in prog_str.replace('Program: ', '').split(',')]
         self.program = {}
+        self.target = ''
         for a, c in enumerate(self.code):
             self.program[a] = c
+            self.target += str(c)
 
         self.a = 0
         self.b = 0
@@ -149,56 +151,81 @@ class Computer:
         self.output = ''
 
 
-def search(c:Computer, curr_targ: str, found: str) -> list:
-    ic(curr_targ, found)
+def search(c:Computer, current_target: str, already_found: str) -> list:
+    # For example, curr_targ: '50330', found: '3033'.
+    # ic(current_target, already_found)
     solutions = []
 
-    for s in range(8 ** (len(curr_targ) - len(found))):
+    for s in range(8 ** (len(current_target) - len(already_found))):
         c.reset()  # Reset the computer.
 
         oct_s = oct(s)[2:]
-        a = int(found + oct_s, 8)
+        a = int(already_found + oct_s, 8)
         c.a = a
         c.run()
-        # ic(s, curr_targ, c.output)
 
-        if c.output == curr_targ:
-            solutions.append(s)
+        if c.output == current_target:
+            solutions.append(str(s))
     return solutions
+
 
 with open('input.txt', 'r') as file:
     input_str = file.read()
 
-# 303300
-
 c = Computer(input_str)
-found = ''
-target = '2415751643550330'
+already_found = ''
+remaining_target = c.target
 current_target = ''
 
-s = search(c=c, curr_targ='0', found='')
-ic(s)   # [3]
+from_end = remaining_target[-1]                 # Get the last character.
+remaining_target = remaining_target[:-1]        # Remove the last character from the string.
+current_target = from_end + current_target
 
-s = search(c=c, curr_targ='30', found='3')
-ic(s)       # ic| s: [0, 1, 5, 7]
+ic(c.target, remaining_target, already_found, current_target)
 
-s = search(c=c, curr_targ='330', found='30')
-ic(s)       # ic| s: [3, 5]
+for i in range(20):
+    s = search(c, current_target, already_found)
+    ic(s)   # [3]
 
-s = search(c=c, curr_targ='0330', found='303')
-ic(s)       # ic| s: [3]
+    if len(s) != 0:
+        this = s[0]
+        already_found += this
+        from_end = remaining_target[-1]  # Get the last character.
+        remaining_target = remaining_target[:-1]  # Remove the last character from the string.
+        current_target = from_end + current_target
 
-s = search(c=c, curr_targ='50330', found='3033')
-ic(s)       # [0]
+        ic(c.target, remaining_target, already_found, current_target)
+    else:
+        pass
+    
+ic(already_found, int(already_found, 8))
 
-s = search(c=c, curr_targ='550330', found='30330')
-ic(s)       # [0, 4, 6, 7]
+# s = search(c, current_target, already_found)
+# ic(s)
+# s = search(c=c, current_target='30', already_found='3')
+# ic(s)       # ic| s: [0, 1, 5, 7]
 
-s = search(c=c, curr_targ='3550330', found='303300')
-ic(s)       # [0, 5]
-
-s = search(c=c, curr_targ='43550330', found='3033000')
-ic(s)       #
+# s = search(c=c, current_target='330', already_found='30')
+# ic(s)       # ic| s: [3, 5]
+#
+# s = search(c=c, current_target='0330', already_found='303')
+# ic(s)       # ic| s: [3]
+#
+# s = search(c=c, current_target='50330', already_found='3033')
+# ic(s)       # [0]
+#
+# s = search(c=c, current_target='550330', already_found='30330')
+# ic(s)       # [0, 4, 6, 7]
+#
+# s = search(c=c, current_target='3550330', already_found='303300')
+# ic(s)       # [0, 5]
+#
+# s = search(c=c, current_target='43550330', already_found='3033000')
+# ic(s)       # []
+#
+# s = search(c=c, current_target='43550330', already_found='3033000')
+# ic(s)       # []
+#
 
 
 # while len(target) > 12:                 # TODO Change back to 0!!!

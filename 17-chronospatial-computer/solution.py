@@ -10,7 +10,7 @@ class Computer:
 
         for pos, line in enumerate(data_str.split('\n')):
             pieces = line.split(' ')
-            v = int(pieces[2], 8)
+            v = int(pieces[2])
 
             if 'A' in pieces[1]:
                 self.a = v
