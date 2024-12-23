@@ -59,7 +59,7 @@ class Keypad:
         return output
 
     def press_keys(self, required: str, found: str, position: str, sequences: set):
-        ic('press_keys', required, found, position, sequences)
+        # ic('press_keys', required, found, position, sequences)
 
         if len(required) == 0:
             sequences.add(found)
@@ -84,12 +84,9 @@ numeric = Keypad(layout="""
     | 0 | A |
     +---+---+""")
 
-presses = numeric.press_one_key(current_key='A', target_key='0')
-ic(presses)
-
-sequences = set()
-numeric.press_keys(required='029A', found='', position='A', sequences=sequences)
-ic(sequences)
+seq1 = set()
+numeric.press_keys(required='029A', found='', position='A', sequences=seq1)
+ic(seq1)
 
 directional = Keypad(layout="""
     +---+---+
@@ -98,8 +95,26 @@ directional = Keypad(layout="""
 | < | v | > |
 +---+---+---+""")
 
+dir1 = set()
+for s in seq1:
+    seq = set()
+    directional.press_keys(required=s, found='', position='A', sequences=seq)
+    dir1.update(seq)
+ic(dir1)
 
+dir2 = set()
+len_dir1 = len(dir1)
+processed = 0
+for s in dir1:
+    ic(processed, len_dir1, s)
+    seq = set()
+    directional.press_keys(required=s, found='', position='A', sequences=seq)
+    dir2.update(seq)
+    processed += 1
+# ic(dir2)
 
+shortest = min(len(s) for s in dir2)
+ic(shortest)
 
 
 with open('test.txt', 'r') as file:
