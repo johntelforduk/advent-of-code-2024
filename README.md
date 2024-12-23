@@ -32,3 +32,9 @@ The puzzle input garden.
 Graph that represents topology of first example maze.
 
 ![Maze](./16-reindeer-maze/screenshots/d16.png)
+
+### Day 21: Keypad Conundrum
+
+Graph that represents topology of numeric keypad.
+
+![Keypad](./21-keypad-conundrum/screenshots/d21.png)

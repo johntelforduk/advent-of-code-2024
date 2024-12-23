@@ -4,6 +4,8 @@
 from icecream import ic
 import networkx as nx
 import matplotlib.pyplot as plt
+from functools import lru_cache
+
 
 def add_non_space(d:dict, k, v):
     if v != ' ':
@@ -45,6 +47,7 @@ class Keypad:
         nx.draw(self.G, pos, with_labels=True)
         plt.show()
 
+    @lru_cache(maxsize=None)
     def press_one_key(self, current_key: str, target_key: str) -> list:
         paths = list(nx.all_shortest_paths(self.G, source=current_key, target=target_key))
         # ic(paths)
@@ -95,30 +98,35 @@ with open('input.txt', 'r') as file:
     code_str = file.read()
 
 total = 0
-for code in code_str.split('\n'):
+for code_no, code in enumerate(code_str.split('\n')):
     seq1 = set()
     numeric.press_keys(required=code, found='', position='A', sequences=seq1)
-    ic(seq1)
 
-    dir1 = set()
-    for s in seq1:
-        seq = set()
-        directional.press_keys(required=s, found='', position='A', sequences=seq)
-        dir1.update(seq)
-    ic(dir1)
+    for robot in range(2):
+        seq2 = set()
+        processed = 0
+        len_seq1 = len(seq1)
 
-    dir2 = set()
-    len_dir1 = len(dir1)
-    processed = 0
-    for s in dir1:
-        ic(processed, len_dir1, s)
-        seq = set()
-        directional.press_keys(required=s, found='', position='A', sequences=seq)
-        dir2.update(seq)
-        processed += 1
+        for s in seq1:
+            ic(code_no, robot, len_seq1, processed)
+            seq = set()
+            directional.press_keys(required=s, found='', position='A', sequences=seq)
+            seq2.update(seq)
+            processed += 1
+        seq1 = seq2.copy()
+
+    # dir2 = set()
+    # len_dir1 = len(dir1)
+    # processed = 0
+    # for s in dir1:
+    #     ic(processed, len_dir1, s)
+    #     seq = set()
+    #     directional.press_keys(required=s, found='', position='A', sequences=seq)
+    #     dir2.update(seq)
+    #     processed += 1
     # ic(dir2)
 
-    shortest = min(len(s) for s in dir2)
+    shortest = min(len(s) for s in seq1)
     ic(shortest)
 
     numeric_part = int(code[:-1])
