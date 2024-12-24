@@ -75,6 +75,20 @@ class Keypad:
             so_far = found + option
             self.press_keys(required=left, found=so_far, position=next_key, sequences=sequences)
 
+def reduce(sequences: set) -> set:
+    shortest = None
+    for s in sequences:
+        if shortest is None:
+            shortest = len(s)
+        else:
+            shortest = min(shortest, len(s))
+
+    shorts = set()
+    for s in sequences:
+        if len(s) == shortest:
+            shorts.add(s)
+    return shorts
+
 
 numeric = Keypad(layout="""
 +---+---+---+
@@ -105,7 +119,10 @@ for code_no, code in enumerate(code_str.split('\n')):
     for robot in range(2):
         seq2 = set()
         processed = 0
+        seq1 = reduce(seq1)
         len_seq1 = len(seq1)
+
+
 
         for s in seq1:
             ic(code_no, robot, len_seq1, processed)
