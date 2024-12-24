@@ -61,21 +61,23 @@ class Keypad:
             output.append(labels)
         return output
 
-    def press_keys(self, required: str, found: str, position: str, sequences: set):
+    # @lru_cache(maxsize=None)
+    def press_keys(self, required: str, found: str, position: str) -> list:
         # ic('press_keys', required, found, position, sequences)
 
         if len(required) == 0:
-            sequences.add(found)
-            return
+            return [found]
 
         next_key = required[0]          # Next key we need is the front character of the string.
         left = required[1:]             # Once we get the next key, what's left is the rest of the characters.
 
+        new = []
         for option in self.press_one_key(current_key=position, target_key=next_key):
             so_far = found + option
-            self.press_keys(required=left, found=so_far, position=next_key, sequences=sequences)
+            new.extend(self.press_keys(required=left, found=so_far, position=next_key))
+        return new
 
-def reduce(sequences: set) -> set:
+def reduce(sequences: list) -> list:
     shortest = None
     for s in sequences:
         if shortest is None:
@@ -83,10 +85,10 @@ def reduce(sequences: set) -> set:
         else:
             shortest = min(shortest, len(s))
 
-    shorts = set()
+    shorts = []
     for s in sequences:
         if len(s) == shortest:
-            shorts.add(s)
+            shorts.append(s)
     return shorts
 
 
@@ -108,40 +110,26 @@ directional = Keypad(layout="""
 | < | v | > |
 +---+---+---+""")
 
-with open('input.txt', 'r') as file:
+with open('test.txt', 'r') as file:
     code_str = file.read()
 
 total = 0
 for code_no, code in enumerate(code_str.split('\n')):
-    seq1 = set()
-    numeric.press_keys(required=code, found='', position='A', sequences=seq1)
+    seq1 = numeric.press_keys(required=code, found='', position='A')
+    ic(seq1)
 
     for robot in range(2):
-        seq2 = set()
+        ic(code_no, robot)
+        seq2 = []
         processed = 0
         seq1 = reduce(seq1)
-        len_seq1 = len(seq1)
-
-
 
         for s in seq1:
-            ic(code_no, robot, len_seq1, processed)
-            seq = set()
-            directional.press_keys(required=s, found='', position='A', sequences=seq)
-            seq2.update(seq)
+            ic(s)
+            seq = directional.press_keys(required=s, found='', position='A')
+            seq2.extend(seq)
             processed += 1
         seq1 = seq2.copy()
-
-    # dir2 = set()
-    # len_dir1 = len(dir1)
-    # processed = 0
-    # for s in dir1:
-    #     ic(processed, len_dir1, s)
-    #     seq = set()
-    #     directional.press_keys(required=s, found='', position='A', sequences=seq)
-    #     dir2.update(seq)
-    #     processed += 1
-    # ic(dir2)
 
     shortest = min(len(s) for s in seq1)
     ic(shortest)
