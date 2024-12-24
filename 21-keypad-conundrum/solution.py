@@ -73,6 +73,7 @@ class Keypad:
             self.press_keys(required=left, found=so_far, position=next_key, sequences=sequences)
 
 
+
 numeric = Keypad(layout="""
 +---+---+---+
 | 7 | 8 | 9 |

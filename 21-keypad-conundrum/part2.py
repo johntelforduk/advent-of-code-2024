@@ -50,8 +50,6 @@ class Keypad:
     @lru_cache(maxsize=None)
     def press_one_key(self, current_key: str, target_key: str) -> list:
         paths = list(nx.all_shortest_paths(self.G, source=current_key, target=target_key))
-        # ic(paths)
-
         output = []
         for path in paths:
             labels = ''
@@ -61,10 +59,8 @@ class Keypad:
             output.append(labels)
         return output
 
-    # @lru_cache(maxsize=None)
-    def press_keys(self, required: str, found: str, position: str) -> list:
-        # ic('press_keys', required, found, position, sequences)
-
+    @lru_cache(maxsize=None)
+    def press_keys(self, required: str, found: str, start_key: str) -> list:
         if len(required) == 0:
             return [found]
 
@@ -72,24 +68,51 @@ class Keypad:
         left = required[1:]             # Once we get the next key, what's left is the rest of the characters.
 
         new = []
-        for option in self.press_one_key(current_key=position, target_key=next_key):
+        for option in self.press_one_key(current_key=start_key, target_key=next_key):
             so_far = found + option
-            new.extend(self.press_keys(required=left, found=so_far, position=next_key))
+            new.extend(self.press_keys(required=left, found=so_far, start_key=next_key))
         return new
 
-def reduce(sequences: list) -> list:
-    shortest = None
-    for s in sequences:
-        if shortest is None:
-            shortest = len(s)
-        else:
-            shortest = min(shortest, len(s))
+    @lru_cache(maxsize=None)
+    def start_key_a(self, required) -> str:
+        """For a parm required sequence, start at key 'A'. Return one example of the shortest sequence
+        possible."""
+        shortest = None
+        for sequence in self.press_keys(required=required, found='', start_key='A'):
+            if shortest is None:
+                shortest = sequence
+            else:
+                if len(sequence) < len(shortest):
+                    shortest = sequence
+        return shortest
 
-    shorts = []
-    for s in sequences:
-        if len(s) == shortest:
-            shorts.append(s)
-    return shorts
+
+# def score(sequence: str) -> int:
+#     score = 0
+#     # Distance from "A".
+#     for c in sequence:
+#         if c == '<':
+#             score += 3
+#         elif c == 'v':
+#             score += 2
+#         else:
+#             score += 1
+#     return score
+
+
+# def reduce(sequences: list) -> list:
+#     shortest = None
+#     for s in sequences:
+#         if shortest is None:
+#             shortest = len(s)
+#         else:
+#             shortest = min(shortest, len(s))
+#
+#     shorts = []
+#     for s in sequences:
+#         if len(s) == shortest:
+#             shorts.append(s)
+#     return shorts
 
 
 numeric = Keypad(layout="""
@@ -113,28 +136,91 @@ directional = Keypad(layout="""
 with open('test.txt', 'r') as file:
     code_str = file.read()
 
+def patterns(sequence: str) -> dict:
+    """For a parm sequence string, count the number of occurances of each pattern in it."""
+    output = {}
+    sub = ''
+    stage = 'moves'
+    for x in sequence:
+        if stage == 'moves' and x != 'A':
+            sub += x
+        elif stage == 'moves' and x == 'A':
+            stage = 'aiis'
+            sub += x
+        elif stage == 'aiis' and x == 'A':
+            sub += x
+        elif stage == 'aiis' and x != 'A':
+            if sub != '':
+                if sub not in output:
+                    output[sub] = 1
+                else:
+                    output[sub] += 1
+            stage = 'moves'
+            sub = x
+
+    # Don's miss the last one.
+    if sub != '':
+        if sub not in output:
+            output[sub] = 1
+        else:
+            output[sub] += 1
+
+    return output
+
+
 total = 0
 for code_no, code in enumerate(code_str.split('\n')):
-    seq1 = numeric.press_keys(required=code, found='', position='A')
-    ic(seq1)
+    numeric_sequences = numeric.press_keys(required=code, found='', start_key='A')
 
-    for robot in range(2):
-        ic(code_no, robot)
-        seq2 = []
-        processed = 0
-        seq1 = reduce(seq1)
+    for sequence in numeric_sequences:
+        current_patterns = patterns(sequence)
+        ic(code_no, code, sequence, current_patterns)
 
-        for s in seq1:
-            ic(s)
-            seq = directional.press_keys(required=s, found='', position='A')
-            seq2.extend(seq)
-            processed += 1
-        seq1 = seq2.copy()
+        # Robot 1
+        new_whole_pattern = {}
+        for pattern in current_patterns:
+            shortest = directional.start_key_a(required=pattern)
+            ic(pattern, shortest)
+            new_patterns = patterns(shortest)
+            ic(new_patterns)
 
-    shortest = min(len(s) for s in seq1)
-    ic(shortest)
+            for each in new_patterns:
+                if each not in new_whole_pattern:
+                    new_whole_pattern[each] = new_patterns[each]
+                else:
+                    new_whole_pattern[each] += new_patterns[each]
+        ic(new_whole_pattern)
+        
 
-    numeric_part = int(code[:-1])
-    total += shortest * numeric_part
 
-ic(total)
+
+
+#     for robot in range(1):
+#         ic(code_no, robot)
+#         seq2 = []
+#         processed = 0
+#
+#         ic(len(seq1))
+#         for s in seq1:
+#
+#             for sub in s.split('A'):
+#                 if sub != '':
+#                     need = sub + 'A'
+#                     ic(s, sub, need)
+#                     sub_seq = directional.press_keys(required=need, found='', position='A')[0]
+#
+#
+#             seq = directional.press_keys(required=s, found='', position='A')
+#             seq2.extend(seq)
+#             processed += 1
+#
+#         # seq2 = reduce(seq2)
+#         # seq1 = seq2.copy()
+#
+#     shortest = min(len(s) for s in seq1)
+#     ic(shortest)
+#
+#     numeric_part = int(code[:-1])
+#     total += shortest * numeric_part
+#
+# ic(total)
