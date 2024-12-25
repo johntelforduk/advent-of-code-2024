@@ -44,7 +44,7 @@ class Keypad:
         nx.draw(self.G, pos, with_labels=True)
         plt.show()
 
-    @lru_cache(maxsize=None)
+    # @lru_cache(maxsize=None)
     def press_one_key(self, current_key: str, target_key: str) -> list:
         paths = list(nx.all_shortest_paths(self.G, source=current_key, target=target_key))
         output = []
@@ -56,7 +56,7 @@ class Keypad:
             output.append(labels)
         return output
 
-    @lru_cache(maxsize=None)
+    # @lru_cache(maxsize=None)
     def press_keys(self, required: str, found: str, start_key: str) -> list:
         if len(required) == 0:
             return [found]
@@ -70,8 +70,8 @@ class Keypad:
             new.extend(self.press_keys(required=left, found=so_far, start_key=next_key))
         return new
 
-    @lru_cache(maxsize=None)
-    def start_key_a(self, required) -> str:
+    # @lru_cache(maxsize=None)
+    def start_key_a(self, required: str) -> str:
         """For a parm required sequence, start at key 'A'. Return one example of the shortest sequence
         possible."""
         shortest = None
@@ -82,9 +82,9 @@ class Keypad:
                 if len(sequence) < len(shortest):
                     shortest = sequence
 
-        # To make output compatible with example.
-        if shortest == 'v<':
-            return '<v'
+        # # To make output compatible with example.
+        # if shortest == 'v<':
+        #     return '<v'
 
         return shortest
 
@@ -107,12 +107,19 @@ directional = Keypad(layout="""
 | < | v | > |
 +---+---+---+""")
 
-with open('test.txt', 'r') as file:
-    code_str = file.read()
 
-def patterns(sequence: str) -> list:
+
+def length(patterns: dict) -> int:
+    """Work out the total length of the sequence represented by the pattern occurance counts."""
+    total = 0
+    for p in patterns:
+        total += len(p) * patterns[p]
+    return total
+
+
+def patterns(sequence: str) -> dict:
     """For a parm sequence string, count the number of occurances of each pattern in it."""
-    output = []
+    output = {}
     output_str = ''
     sub = ''
     stage = 'moves'
@@ -126,61 +133,73 @@ def patterns(sequence: str) -> list:
             sub += x
         elif stage == 'aiis' and x != 'A':
         # if sub != '':
-            output.append(sub)
+
+            if sub not in output:
+                output[sub] = 1
+            else:
+                output[sub] += 1
             output_str += sub
             stage = 'moves'
+
             sub = x
 
     # Don's miss the last one.
     # if sub != '':
-    output.append(sub)
+    # output.append(sub)
+    if sub not in output:
+        output[sub] = 1
+    else:
+        output[sub] += 1
+
     output_str += sub
 
     assert sequence == output_str
+    assert length(output) == len(sequence)
     return output
 
-def length(patterns: dict) -> int:
-    """Work out the total length of the sequence represented by the pattern occurance counts."""
-    total = 0
-    for p in patterns:
-        total += len(p) * patterns[p]
-    return total
 
-answer = '<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A'
-ic(answer, len(answer), sorted(patterns(answer)))
+with open('test.txt', 'r') as file:
+    code_str = file.read()
 
 total = 0
-for code_no, code in enumerate(code_str.split('\n')):
+for code in code_str.split('\n'):
     numeric_sequences = numeric.press_keys(required=code, found='', start_key='A')
 
     lowest = None
     for sequence in numeric_sequences:
         current_sequence = sequence
+        pattern_dict = patterns(current_sequence)
 
-        for robot in range(25):
-            ic(code, code_no, robot, len(current_sequence))
-            pattern_list = patterns(current_sequence)
+        for robot in range(3):
+            ic(robot, length(pattern_dict), pattern_dict)
 
-            next_sequence = ''
-            for pattern in pattern_list:
+            next_pattern_dict = {}
+            for pattern in pattern_dict:
                 shortest = directional.start_key_a(required=pattern)
                 new_patterns = patterns(shortest)
+                ic(robot, pattern, shortest)
 
                 for each in new_patterns:
-                    next_sequence += each
+                    if each not in next_pattern_dict:
+                        next_pattern_dict[each] = pattern_dict[pattern] * new_patterns[each]
+                    else:
+                        next_pattern_dict[each] += pattern_dict[pattern] * new_patterns[each]
 
-            # ic(code, sequence, robot, next_sequence)
-            current_sequence = next_sequence
+            pattern_dict = next_pattern_dict.copy()
 
-        sequence_length = len(current_sequence)
-        # ic(code, sequence, current_sequence, sequence_length)
-        if lowest is None:
-            lowest = sequence_length
-        else:
-            lowest = min(lowest, sequence_length)
+        sequence_length = length(pattern_dict)
+
+    # ic(code, sequence, current_sequence, sequence_length)
+    if lowest is None:
+        lowest = sequence_length
+    else:
+        lowest = min(lowest, sequence_length)
 
     numeric_part = int(code[:-1])
-    # ic(code, lowest, numeric_part)
-    total += lowest * numeric_part
+    complexity = lowest * numeric_part
+    ic(code, lowest)
+    total += complexity
 
-ic(total)
+# ic(total)
+
+ic(patterns("<vA<AA>>^AvAA<^A>A"))
