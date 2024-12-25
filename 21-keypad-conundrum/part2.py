@@ -110,10 +110,10 @@ directional = Keypad(layout="""
 with open('test.txt', 'r') as file:
     code_str = file.read()
 
-def patterns(sequence: str) -> dict:
+def patterns(sequence: str) -> list:
     """For a parm sequence string, count the number of occurances of each pattern in it."""
-    output = {}
-    out = ''
+    output = []
+    output_str = ''
     sub = ''
     stage = 'moves'
     for x in sequence:
@@ -125,24 +125,18 @@ def patterns(sequence: str) -> dict:
         elif stage == 'aiis' and x == 'A':
             sub += x
         elif stage == 'aiis' and x != 'A':
-            if sub != '':
-                if sub not in output:
-                    output[sub] = 1
-                else:
-                    output[sub] += 1
-                out += sub
+        # if sub != '':
+            output.append(sub)
+            output_str += sub
             stage = 'moves'
             sub = x
 
     # Don's miss the last one.
-    if sub != '':
-        out += sub
-        if sub not in output:
-            output[sub] = 1
-        else:
-            output[sub] += 1
+    # if sub != '':
+    output.append(sub)
+    output_str += sub
 
-    assert sequence == out
+    assert sequence == output_str
     return output
 
 def length(patterns: dict) -> int:
@@ -161,36 +155,32 @@ for code_no, code in enumerate(code_str.split('\n')):
 
     lowest = None
     for sequence in numeric_sequences:
-        current_patterns = patterns(sequence)
-        assert len(sequence) == length(current_patterns)
+        current_sequence = sequence
 
-        for robot in range(2):
-            new_whole_pattern = {}
-            for pattern in current_patterns:
+        for robot in range(25):
+            ic(code, code_no, robot, len(current_sequence))
+            pattern_list = patterns(current_sequence)
+
+            next_sequence = ''
+            for pattern in pattern_list:
                 shortest = directional.start_key_a(required=pattern)
-                # ic(pattern, shortest)
                 new_patterns = patterns(shortest)
-                assert len(shortest) == length(new_patterns)
-                # ic(new_patterns)
 
                 for each in new_patterns:
-                    if each not in new_whole_pattern:
-                        new_whole_pattern[each] = new_patterns[each]
-                    else:
-                        new_whole_pattern[each] += new_patterns[each]
+                    next_sequence += each
 
-            ic(code, sequence, robot, sorted(new_whole_pattern))
-            current_patterns = new_whole_pattern.copy()
+            # ic(code, sequence, robot, next_sequence)
+            current_sequence = next_sequence
 
-        sequence_length = length(current_patterns)
-        ic(code, sequence_length, sequence, current_patterns)
+        sequence_length = len(current_sequence)
+        # ic(code, sequence, current_sequence, sequence_length)
         if lowest is None:
             lowest = sequence_length
         else:
             lowest = min(lowest, sequence_length)
 
     numeric_part = int(code[:-1])
-    ic(code, lowest, numeric_part)
+    # ic(code, lowest, numeric_part)
     total += lowest * numeric_part
 
 ic(total)
