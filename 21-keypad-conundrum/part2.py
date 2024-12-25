@@ -11,9 +11,6 @@ def add_non_space(d:dict, k, v):
     if v != ' ':
         d[k] = v
 
-# input = the layout of the keys.
-# input = desired code, 029A
-# output = list of shortest possible key sequences to achieve it.
 class Keypad:
 
     def __init__(self, layout: str):
@@ -84,35 +81,12 @@ class Keypad:
             else:
                 if len(sequence) < len(shortest):
                     shortest = sequence
+
+        # To make output compatible with example.
+        if shortest == 'v<':
+            return '<v'
+
         return shortest
-
-
-# def score(sequence: str) -> int:
-#     score = 0
-#     # Distance from "A".
-#     for c in sequence:
-#         if c == '<':
-#             score += 3
-#         elif c == 'v':
-#             score += 2
-#         else:
-#             score += 1
-#     return score
-
-
-# def reduce(sequences: list) -> list:
-#     shortest = None
-#     for s in sequences:
-#         if shortest is None:
-#             shortest = len(s)
-#         else:
-#             shortest = min(shortest, len(s))
-#
-#     shorts = []
-#     for s in sequences:
-#         if len(s) == shortest:
-#             shorts.append(s)
-#     return shorts
 
 
 numeric = Keypad(layout="""
@@ -139,6 +113,7 @@ with open('test.txt', 'r') as file:
 def patterns(sequence: str) -> dict:
     """For a parm sequence string, count the number of occurances of each pattern in it."""
     output = {}
+    out = ''
     sub = ''
     stage = 'moves'
     for x in sequence:
@@ -155,72 +130,67 @@ def patterns(sequence: str) -> dict:
                     output[sub] = 1
                 else:
                     output[sub] += 1
+                out += sub
             stage = 'moves'
             sub = x
 
     # Don's miss the last one.
     if sub != '':
+        out += sub
         if sub not in output:
             output[sub] = 1
         else:
             output[sub] += 1
 
+    assert sequence == out
     return output
 
+def length(patterns: dict) -> int:
+    """Work out the total length of the sequence represented by the pattern occurance counts."""
+    total = 0
+    for p in patterns:
+        total += len(p) * patterns[p]
+    return total
+
+answer = '<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A'
+ic(answer, len(answer), sorted(patterns(answer)))
 
 total = 0
 for code_no, code in enumerate(code_str.split('\n')):
     numeric_sequences = numeric.press_keys(required=code, found='', start_key='A')
 
+    lowest = None
     for sequence in numeric_sequences:
         current_patterns = patterns(sequence)
-        ic(code_no, code, sequence, current_patterns)
+        assert len(sequence) == length(current_patterns)
 
-        # Robot 1
-        new_whole_pattern = {}
-        for pattern in current_patterns:
-            shortest = directional.start_key_a(required=pattern)
-            ic(pattern, shortest)
-            new_patterns = patterns(shortest)
-            ic(new_patterns)
+        for robot in range(2):
+            new_whole_pattern = {}
+            for pattern in current_patterns:
+                shortest = directional.start_key_a(required=pattern)
+                # ic(pattern, shortest)
+                new_patterns = patterns(shortest)
+                assert len(shortest) == length(new_patterns)
+                # ic(new_patterns)
 
-            for each in new_patterns:
-                if each not in new_whole_pattern:
-                    new_whole_pattern[each] = new_patterns[each]
-                else:
-                    new_whole_pattern[each] += new_patterns[each]
-        ic(new_whole_pattern)
-        
+                for each in new_patterns:
+                    if each not in new_whole_pattern:
+                        new_whole_pattern[each] = new_patterns[each]
+                    else:
+                        new_whole_pattern[each] += new_patterns[each]
 
+            ic(code, sequence, robot, sorted(new_whole_pattern))
+            current_patterns = new_whole_pattern.copy()
 
+        sequence_length = length(current_patterns)
+        ic(code, sequence_length, sequence, current_patterns)
+        if lowest is None:
+            lowest = sequence_length
+        else:
+            lowest = min(lowest, sequence_length)
 
+    numeric_part = int(code[:-1])
+    ic(code, lowest, numeric_part)
+    total += lowest * numeric_part
 
-#     for robot in range(1):
-#         ic(code_no, robot)
-#         seq2 = []
-#         processed = 0
-#
-#         ic(len(seq1))
-#         for s in seq1:
-#
-#             for sub in s.split('A'):
-#                 if sub != '':
-#                     need = sub + 'A'
-#                     ic(s, sub, need)
-#                     sub_seq = directional.press_keys(required=need, found='', position='A')[0]
-#
-#
-#             seq = directional.press_keys(required=s, found='', position='A')
-#             seq2.extend(seq)
-#             processed += 1
-#
-#         # seq2 = reduce(seq2)
-#         # seq1 = seq2.copy()
-#
-#     shortest = min(len(s) for s in seq1)
-#     ic(shortest)
-#
-#     numeric_part = int(code[:-1])
-#     total += shortest * numeric_part
-#
-# ic(total)
+ic(total)
