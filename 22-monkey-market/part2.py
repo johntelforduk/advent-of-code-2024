@@ -54,13 +54,14 @@ assert unit_digit_delta(65432, 291) == -1
 
 
 
-with open('test2.txt', 'r') as file:
+with open('input.txt', 'r') as file:
     buyers_str = file.read()
 
 distribution = {}
 
 for buyer_seed in [int(line) for line in buyers_str.split('\n')]:
     output = buyer_seed
+    found = set()
     latest4 = []
     for i in range(2000):
         new_output = iterate(output)
@@ -71,26 +72,31 @@ for buyer_seed in [int(line) for line in buyers_str.split('\n')]:
         if len(latest4) > 4:
             latest4.pop(0)
 
-        ic(buyer_seed, new_output % 10, latest4)
+        # ic(buyer_seed, new_output % 10, latest4)
 
         if len(latest4) == 4:
-            hash_latest4 = hash(tuple(latest4))
-            if hash_latest4 not in distribution:
-                distribution[hash_latest4] = (tuple(latest4), 1)
-            else:
-                _, count = distribution[hash_latest4]
-                distribution[hash_latest4] = (tuple(latest4), count + 1)
+            latest4_tuple = tuple(latest4)
+
+            if latest4_tuple not in found:
+                found.add(latest4_tuple)
+                last_digit = new_output % 10
+                if latest4_tuple not in distribution:
+                    distribution[latest4_tuple] = last_digit
+                else:
+                    distribution[latest4_tuple] += last_digit
 
         output = new_output
 
 # ic(len(distribution))
 
 best = None
-for hash_latest4 in distribution:
-    latest4_tuple, count = distribution[hash_latest4]
+for latest4_tuple in distribution:
+    bananas = distribution[latest4_tuple]
     if best is None:
-        best = count
-    elif count > best:
-        best = count
-        ic(latest4_tuple, count)
-ic(best)
+        best_tuple = latest4_tuple
+        best = bananas
+    elif bananas > best:
+        best_tuple = latest4_tuple
+        best = bananas
+
+ic(best_tuple, best)
