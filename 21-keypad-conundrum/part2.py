@@ -44,7 +44,7 @@ class Keypad:
         nx.draw(self.G, pos, with_labels=True)
         plt.show()
 
-    # @lru_cache(maxsize=None)
+    @lru_cache(maxsize=None)
     def press_one_key(self, current_key: str, target_key: str) -> list:
         paths = list(nx.all_shortest_paths(self.G, source=current_key, target=target_key))
         output = []
@@ -52,11 +52,11 @@ class Keypad:
             labels = ''
             for i in range(len(path) - 1):
                 labels += self.G[path[i]][path[i + 1]]['direction']
-            labels += 'A'
+            # labels += 'A'
             output.append(labels)
         return output
 
-    # @lru_cache(maxsize=None)
+    @lru_cache(maxsize=None)
     def press_keys(self, required: str, found: str, start_key: str) -> list:
         if len(required) == 0:
             return [found]
@@ -66,27 +66,61 @@ class Keypad:
 
         new = []
         for option in self.press_one_key(current_key=start_key, target_key=next_key):
-            so_far = found + option
+            so_far = found + option + 'A'
             new.extend(self.press_keys(required=left, found=so_far, start_key=next_key))
         return new
 
-    # @lru_cache(maxsize=None)
-    def start_key_a(self, required: str) -> str:
-        """For a parm required sequence, start at key 'A'. Return one example of the shortest sequence
-        possible."""
-        shortest = None
-        for sequence in self.press_keys(required=required, found='', start_key='A'):
-            if shortest is None:
-                shortest = sequence
+
+
+    #
+    # # @lru_cache(maxsize=None)
+    # def start_key_a(self, required: str) -> str:
+    #     """For a parm required sequence, start at key 'A'. Return one example of the shortest sequence
+    #     possible."""
+    #     shortest = None
+    #     for sequence in self.press_keys(required=required, found='', start_key='A'):
+    #         if shortest is None:
+    #             shortest = sequence
+    #         else:
+    #             if len(sequence) < len(shortest):
+    #                 shortest = sequence
+    #
+    #     # # To make output compatible with example.
+    #     # if shortest == 'v<':
+    #     #     return '<v'
+    #
+    #     return shortest
+
+# def best(sequences: list) -> str:
+#     """Pick the best sequence from a list of options.
+#     Based on,
+#     - shortest.
+#     - least zig-zaggy."""
+
+
+@lru_cache(maxsize=None)
+def split_sequence(sequence: str) -> list:
+    assert sequence[-1] == 'A'                          # Sequences should always end with 'A'.
+    return [c + 'A' for c in sequence.split('A')[:-1]]
+
+
+@lru_cache(maxsize=None)
+def shortest(sequence: str, depth: int, kp: Keypad) -> int:
+    if depth == 0:
+        return len(sequence)
+
+    total = 0
+    for sub_sequence in split_sequence(sequence):
+        keys_list = kp.press_keys(required=sub_sequence, found='', start_key='A')
+        minimum = None
+        for each_key_seq in keys_list:
+            this_short = shortest(sequence=each_key_seq, depth=depth - 1, kp=kp)
+            if minimum is None:
+                minimum = this_short
             else:
-                if len(sequence) < len(shortest):
-                    shortest = sequence
-
-        # # To make output compatible with example.
-        # if shortest == 'v<':
-        #     return '<v'
-
-        return shortest
+                minimum = min(minimum, this_short)
+        total += minimum
+    return total
 
 
 numeric = Keypad(layout="""
@@ -100,6 +134,8 @@ numeric = Keypad(layout="""
     | 0 | A |
     +---+---+""")
 
+ic(numeric.press_one_key('7', '0'))
+
 directional = Keypad(layout="""
     +---+---+
     | ^ | A |
@@ -107,99 +143,143 @@ directional = Keypad(layout="""
 | < | v | > |
 +---+---+---+""")
 
+ic(directional.press_keys('<A', '', 'A'))
+ic(directional.press_keys('v<<A', '', 'A'))
 
-
-def length(patterns: dict) -> int:
-    """Work out the total length of the sequence represented by the pattern occurance counts."""
-    total = 0
-    for p in patterns:
-        total += len(p) * patterns[p]
-    return total
-
-
-def patterns(sequence: str) -> dict:
-    """For a parm sequence string, count the number of occurances of each pattern in it."""
-    output = {}
-    output_str = ''
-    sub = ''
-    stage = 'moves'
-    for x in sequence:
-        if stage == 'moves' and x != 'A':
-            sub += x
-        elif stage == 'moves' and x == 'A':
-            stage = 'aiis'
-            sub += x
-        elif stage == 'aiis' and x == 'A':
-            sub += x
-        elif stage == 'aiis' and x != 'A':
-        # if sub != '':
-
-            if sub not in output:
-                output[sub] = 1
-            else:
-                output[sub] += 1
-            output_str += sub
-            stage = 'moves'
-
-            sub = x
-
-    # Don's miss the last one.
-    # if sub != '':
-    # output.append(sub)
-    if sub not in output:
-        output[sub] = 1
-    else:
-        output[sub] += 1
-
-    output_str += sub
-
-    assert sequence == output_str
-    assert length(output) == len(sequence)
-    return output
-
+assert split_sequence('v<<A>>^A') == ['v<<A', '>>^A']
+ic(split_sequence('<vA<AA>>^A'))
+assert split_sequence('<vA<AA>>^A') == ['<vA', '<A', 'A', '>>^A']
 
 with open('test.txt', 'r') as file:
     code_str = file.read()
 
-total = 0
 for code in code_str.split('\n'):
     numeric_sequences = numeric.press_keys(required=code, found='', start_key='A')
+    ic(code, numeric_sequences)
 
     lowest = None
     for sequence in numeric_sequences:
-        current_sequence = sequence
-        pattern_dict = patterns(current_sequence)
+        ic(shortest(sequence=sequence, depth=25, kp=directional))
 
-        for robot in range(3):
-            ic(robot, length(pattern_dict), pattern_dict)
 
-            next_pattern_dict = {}
-            for pattern in pattern_dict:
-                shortest = directional.start_key_a(required=pattern)
-                new_patterns = patterns(shortest)
-                ic(robot, pattern, shortest)
 
-                for each in new_patterns:
-                    if each not in next_pattern_dict:
-                        next_pattern_dict[each] = pattern_dict[pattern] * new_patterns[each]
-                    else:
-                        next_pattern_dict[each] += pattern_dict[pattern] * new_patterns[each]
+# def length(patterns: dict) -> int:
+#     """Work out the total length of the sequence represented by the pattern occurance counts."""
+#     total = 0
+#     for p in patterns:
+#         total += len(p) * patterns[p]
+#     return total
+#
+#
+# # def back_to_a(sequence: str) -> list:
+# #     x, y = 0, 0
+# #     for c in sequence: str
+#
+# def patterns(sequence: str) -> dict:
+#     # TODO Each sequence doesn't necessarily start at A !!!
+#
+#     """For a parm sequence string, count the number of occurances of each pattern in it."""
+#     output = {}
+#     deltas = {'A': (0, 0), 'v': (0, 1), '^': (0, -1), '<': (-1, 0), '>': (1, 0)}
+#     x, y = 0, 0
+#     curr = ''
+#     for k in sequence:
+#         curr += k
+#         xd, yd = deltas[k]
+#         x += xd
+#         y += yd
+#         if x == y == 0:
+#             if curr not in output:
+#                 output[curr] = 1
+#             else:
+#                 output[curr] += 1
+#             curr = ''
+#
+#     if curr != '':
+#         if curr not in output:
+#             output[curr] = 1
+#         else:
+#             output[curr] += 1
+#         # curr = ''
+#
+#     # assert x == y == 0
+#     assert length(output) == len(sequence)
+#
+#     return output
 
-            pattern_dict = next_pattern_dict.copy()
+    # sp = sequence.split('A')
+    # end = sp.pop()
+    # assert end == ''
+    # for k in sp:
+    #     seq = k + 'A'
+    #     if seq not in output:
+    #         output[seq] = 1
+    #     else:
+    #         output[seq] += 1
+    #
+    # # ic(sequence, sp, output)
+    # assert length(output) == len(sequence)
+    # return output
 
-        sequence_length = length(pattern_dict)
 
-    # ic(code, sequence, current_sequence, sequence_length)
-    if lowest is None:
-        lowest = sequence_length
-    else:
-        lowest = min(lowest, sequence_length)
-
-    numeric_part = int(code[:-1])
-    complexity = lowest * numeric_part
-    ic(code, lowest)
-    total += complexity
-
+# ic(patterns('<A^A>^^AvvvA'))
+# ic(patterns('v<<A>>^A<A>AvA<^AA>A<vAAA>^A'))
+# ic(patterns('<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A'))
+#
+# with open('test.txt', 'r') as file:
+#     code_str = file.read()
+#
+# total = 0
+# for code in code_str.split('\n'):
+#     numeric_sequences = numeric.press_keys(required=code, found='', start_key='A')
+#
+#     lowest = None
+#     for sequence in numeric_sequences:
+#         current_sequence = sequence
+#         pattern_dict = patterns(current_sequence)
+#         ic(current_sequence, pattern_dict)
+#
+#         for robot in range(2):
+#             # ic(robot, length(pattern_dict), pattern_dict)
+#
+#             next_pattern_dict = {}
+#             for pattern in pattern_dict:
+#                 shortest = directional.start_key_a(required=pattern)
+#                 new_patterns = patterns(shortest)
+#                 # ic(robot, pattern, shortest)
+#
+#                 for each in new_patterns:
+#                     if each not in next_pattern_dict:
+#                         next_pattern_dict[each] = pattern_dict[pattern] * new_patterns[each]
+#                     else:
+#                         next_pattern_dict[each] += pattern_dict[pattern] * new_patterns[each]
+#
+#             pattern_dict = next_pattern_dict.copy()
+#
+#         sequence_length = length(pattern_dict)
+#
+#     # ic(code, sequence, current_sequence, sequence_length)
+#     if lowest is None:
+#         lowest = sequence_length
+#         low_patt = pattern_dict.copy()
+#     elif sequence_length < lowest:
+#         lowest = sequence_length
+#         low_patt = pattern_dict.copy()
+#
+#     numeric_part = int(code[:-1])
+#     complexity = lowest * numeric_part
+#     ic(code, lowest)
+#     total += complexity
+#
+# # ic(length(low_patt))
+# # ic(low_patt)
 # ic(total)
-
-ic(patterns("<vA<AA>>^AvAA<^A>A"))
+#
+# # ic(patterns("<vA<AA>>^AvAA<^A>A"))
+# # ic(len('<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A'))
+# # ic(len('<v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A'))
+# # ic(len('<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A'))
+# # ic(len('<v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A'))
+# correct = '<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A'
+# ic(len(correct))
+# ic(patterns(correct))
