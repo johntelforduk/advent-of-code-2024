@@ -150,84 +150,30 @@ assert split_sequence('v<<A>>^A') == ['v<<A', '>>^A']
 ic(split_sequence('<vA<AA>>^A'))
 assert split_sequence('<vA<AA>>^A') == ['<vA', '<A', 'A', '>>^A']
 
-with open('test.txt', 'r') as file:
+with open('input.txt', 'r') as file:
     code_str = file.read()
 
+total = 0
 for code in code_str.split('\n'):
     numeric_sequences = numeric.press_keys(required=code, found='', start_key='A')
-    ic(code, numeric_sequences)
+    # ic(code, numeric_sequences)
 
     lowest = None
     for sequence in numeric_sequences:
-        ic(shortest(sequence=sequence, depth=25, kp=directional))
+        this = shortest(sequence=sequence, depth=25, kp=directional)
+        if lowest is None:
+            lowest = this
+        else:
+            lowest = min(lowest, this)
+
+    numeric_part = int(code[:-1])
+    complexity = lowest * numeric_part
+    ic(code, lowest)
+    total += complexity
+
+ic(total)
 
 
-
-# def length(patterns: dict) -> int:
-#     """Work out the total length of the sequence represented by the pattern occurance counts."""
-#     total = 0
-#     for p in patterns:
-#         total += len(p) * patterns[p]
-#     return total
-#
-#
-# # def back_to_a(sequence: str) -> list:
-# #     x, y = 0, 0
-# #     for c in sequence: str
-#
-# def patterns(sequence: str) -> dict:
-#     # TODO Each sequence doesn't necessarily start at A !!!
-#
-#     """For a parm sequence string, count the number of occurances of each pattern in it."""
-#     output = {}
-#     deltas = {'A': (0, 0), 'v': (0, 1), '^': (0, -1), '<': (-1, 0), '>': (1, 0)}
-#     x, y = 0, 0
-#     curr = ''
-#     for k in sequence:
-#         curr += k
-#         xd, yd = deltas[k]
-#         x += xd
-#         y += yd
-#         if x == y == 0:
-#             if curr not in output:
-#                 output[curr] = 1
-#             else:
-#                 output[curr] += 1
-#             curr = ''
-#
-#     if curr != '':
-#         if curr not in output:
-#             output[curr] = 1
-#         else:
-#             output[curr] += 1
-#         # curr = ''
-#
-#     # assert x == y == 0
-#     assert length(output) == len(sequence)
-#
-#     return output
-
-    # sp = sequence.split('A')
-    # end = sp.pop()
-    # assert end == ''
-    # for k in sp:
-    #     seq = k + 'A'
-    #     if seq not in output:
-    #         output[seq] = 1
-    #     else:
-    #         output[seq] += 1
-    #
-    # # ic(sequence, sp, output)
-    # assert length(output) == len(sequence)
-    # return output
-
-
-# ic(patterns('<A^A>^^AvvvA'))
-# ic(patterns('v<<A>>^A<A>AvA<^AA>A<vAAA>^A'))
-# ic(patterns('<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A'))
-#
-# with open('test.txt', 'r') as file:
-#     code_str = file.read()
 #
 # total = 0
 # for code in code_str.split('\n'):
@@ -266,10 +212,6 @@ for code in code_str.split('\n'):
 #         lowest = sequence_length
 #         low_patt = pattern_dict.copy()
 #
-#     numeric_part = int(code[:-1])
-#     complexity = lowest * numeric_part
-#     ic(code, lowest)
-#     total += complexity
 #
 # # ic(length(low_patt))
 # # ic(low_patt)
