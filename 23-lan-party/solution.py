@@ -4,12 +4,11 @@
 from icecream import ic
 import networkx as nx
 import matplotlib.pyplot as plt
-import random
 
 
 def render(G, triangles):
     pos = nx.circular_layout(G)  # Node positions.
-    nx.draw(G, pos, with_labels=True, node_color='lightblue', edge_color='gray')  # Base graph
+    nx.draw(G, pos, with_labels=True)  # Base graph.
 
     # Highlight triangles by shading inside them.
     if triangles:
@@ -27,10 +26,9 @@ def render(G, triangles):
                 this_colour = 'orange'
             else:
                 this_colour = 'blue'
-            plt.fill(*zip(*pts), color=this_colour, alpha=0.3)  # Transparent orange fill
+            plt.fill(*zip(*pts), color=this_colour, alpha=0.3)
 
             # Draw edges and nodes for emphasis.
-            # nx.draw_networkx_nodes(G, pos, nodelist=triangle, node_color='red')
             nx.draw_networkx_edges(G, pos,
                                    edgelist=[(triangle[i], triangle[j]) for i in range(3) for j in range(i + 1, 3)],
                                    edge_color=this_colour, width=2)
@@ -43,13 +41,9 @@ with open('test.txt', 'r') as file:
 G = nx.Graph()
 
 for computer1, computer2 in [line.split('-') for line in network_str.split('\n')]:
-    ic(computer1, computer2)
     G.add_edge(computer1, computer2)
 
-
-
 triangles = [clique for clique in nx.enumerate_all_cliques(G) if len(clique) == 3]
-# ic(triangles)
 
 count = 0
 for tri in triangles:
