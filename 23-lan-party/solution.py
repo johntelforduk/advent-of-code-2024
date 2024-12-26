@@ -30,7 +30,7 @@ def render(G, triangles):
 
     plt.show()
 
-with open('test.txt', 'r') as file:
+with open('input.txt', 'r') as file:
     network_str = file.read()
 
 G = nx.Graph()
@@ -42,8 +42,8 @@ for computer1, computer2 in [line.split('-') for line in network_str.split('\n')
 
 
 triangles = [clique for clique in nx.enumerate_all_cliques(G) if len(clique) == 3]
-ic(triangles)
-render(G, triangles=triangles)
+# ic(triangles)
+# render(G, triangles=triangles)
 
 count = 0
 for tri in triangles:
