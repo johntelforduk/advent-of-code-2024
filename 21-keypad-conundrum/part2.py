@@ -7,9 +7,10 @@ import matplotlib.pyplot as plt
 from functools import lru_cache
 
 
-def add_non_space(d:dict, k, v):
+def add_non_space(d: dict, k, v):
     if v != ' ':
         d[k] = v
+
 
 class Keypad:
 
@@ -25,7 +26,6 @@ class Keypad:
                 add_non_space(pad, (1, y), row[6])
                 add_non_space(pad, (2, y), row[10])
                 y += 1
-        # ic(pad)
 
         # Use the dict to make a graph of key routes.
         self.G = nx.DiGraph()
@@ -69,33 +69,6 @@ class Keypad:
             so_far = found + option + 'A'
             new.extend(self.press_keys(required=left, found=so_far, start_key=next_key))
         return new
-
-
-
-    #
-    # # @lru_cache(maxsize=None)
-    # def start_key_a(self, required: str) -> str:
-    #     """For a parm required sequence, start at key 'A'. Return one example of the shortest sequence
-    #     possible."""
-    #     shortest = None
-    #     for sequence in self.press_keys(required=required, found='', start_key='A'):
-    #         if shortest is None:
-    #             shortest = sequence
-    #         else:
-    #             if len(sequence) < len(shortest):
-    #                 shortest = sequence
-    #
-    #     # # To make output compatible with example.
-    #     # if shortest == 'v<':
-    #     #     return '<v'
-    #
-    #     return shortest
-
-# def best(sequences: list) -> str:
-#     """Pick the best sequence from a list of options.
-#     Based on,
-#     - shortest.
-#     - least zig-zaggy."""
 
 
 @lru_cache(maxsize=None)
@@ -143,20 +116,12 @@ directional = Keypad(layout="""
 | < | v | > |
 +---+---+---+""")
 
-ic(directional.press_keys('<A', '', 'A'))
-ic(directional.press_keys('v<<A', '', 'A'))
-
-assert split_sequence('v<<A>>^A') == ['v<<A', '>>^A']
-ic(split_sequence('<vA<AA>>^A'))
-assert split_sequence('<vA<AA>>^A') == ['<vA', '<A', 'A', '>>^A']
-
 with open('input.txt', 'r') as file:
     code_str = file.read()
 
 total = 0
 for code in code_str.split('\n'):
     numeric_sequences = numeric.press_keys(required=code, found='', start_key='A')
-    # ic(code, numeric_sequences)
 
     lowest = None
     for sequence in numeric_sequences:
@@ -172,56 +137,3 @@ for code in code_str.split('\n'):
     total += complexity
 
 ic(total)
-
-
-#
-# total = 0
-# for code in code_str.split('\n'):
-#     numeric_sequences = numeric.press_keys(required=code, found='', start_key='A')
-#
-#     lowest = None
-#     for sequence in numeric_sequences:
-#         current_sequence = sequence
-#         pattern_dict = patterns(current_sequence)
-#         ic(current_sequence, pattern_dict)
-#
-#         for robot in range(2):
-#             # ic(robot, length(pattern_dict), pattern_dict)
-#
-#             next_pattern_dict = {}
-#             for pattern in pattern_dict:
-#                 shortest = directional.start_key_a(required=pattern)
-#                 new_patterns = patterns(shortest)
-#                 # ic(robot, pattern, shortest)
-#
-#                 for each in new_patterns:
-#                     if each not in next_pattern_dict:
-#                         next_pattern_dict[each] = pattern_dict[pattern] * new_patterns[each]
-#                     else:
-#                         next_pattern_dict[each] += pattern_dict[pattern] * new_patterns[each]
-#
-#             pattern_dict = next_pattern_dict.copy()
-#
-#         sequence_length = length(pattern_dict)
-#
-#     # ic(code, sequence, current_sequence, sequence_length)
-#     if lowest is None:
-#         lowest = sequence_length
-#         low_patt = pattern_dict.copy()
-#     elif sequence_length < lowest:
-#         lowest = sequence_length
-#         low_patt = pattern_dict.copy()
-#
-#
-# # ic(length(low_patt))
-# # ic(low_patt)
-# ic(total)
-#
-# # ic(patterns("<vA<AA>>^AvAA<^A>A"))
-# # ic(len('<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A'))
-# # ic(len('<v<A>>^AAAvA^A<vA<AA>>^AvAA<^A>A<v<A>A>^AAAvA<^A>A<vA>^A<A>A'))
-# # ic(len('<v<A>>^A<vA<A>>^AAvAA<^A>A<v<A>>^AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A'))
-# # ic(len('<v<A>>^AA<vA<A>>^AAvAA<^A>A<vA>^A<A>A<vA>^A<A>A<v<A>A>^AAvA<^A>A'))
-# correct = '<v<A>>^AvA^A<vA<AA>>^AAvA<^A>AAvA^A<vA>^AA<A>A<v<A>A>^AAAvA<^A>A'
-# ic(len(correct))
-# ic(patterns(correct))
