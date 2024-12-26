@@ -18,19 +18,26 @@ def render(G, triangles):
             pts = [pos[node] for node in triangle]
             pts.append(pts[0])  # Close the triangle by repeating the first point.
 
-            # Shade the triangle area.
-            this_colour = 'orange'
+            has_t = False
+            for v in triangle:
+                if v[0] == 't':
+                    has_t = True
+
+            if has_t:
+                this_colour = 'orange'
+            else:
+                this_colour = 'blue'
             plt.fill(*zip(*pts), color=this_colour, alpha=0.3)  # Transparent orange fill
 
             # Draw edges and nodes for emphasis.
-            nx.draw_networkx_nodes(G, pos, nodelist=triangle, node_color='orange')
+            # nx.draw_networkx_nodes(G, pos, nodelist=triangle, node_color='red')
             nx.draw_networkx_edges(G, pos,
                                    edgelist=[(triangle[i], triangle[j]) for i in range(3) for j in range(i + 1, 3)],
-                                   edge_color='red', width=2)
+                                   edge_color=this_colour, width=2)
 
     plt.show()
 
-with open('input.txt', 'r') as file:
+with open('test.txt', 'r') as file:
     network_str = file.read()
 
 G = nx.Graph()
@@ -43,7 +50,6 @@ for computer1, computer2 in [line.split('-') for line in network_str.split('\n')
 
 triangles = [clique for clique in nx.enumerate_all_cliques(G) if len(clique) == 3]
 # ic(triangles)
-# render(G, triangles=triangles)
 
 count = 0
 for tri in triangles:
@@ -53,3 +59,5 @@ for tri in triangles:
             count += 1
             found = True
 ic(count)
+
+render(G, triangles=triangles)
