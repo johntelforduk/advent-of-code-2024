@@ -38,3 +38,9 @@ Graph that represents topology of first example maze.
 Graph that represents topology of numeric keypad.
 
 ![Keypad](./21-keypad-conundrum/screenshots/d21.png)
+
+### Day 23: LAN Party
+
+Render of the test computer network. Normal cliques of 3 shaded blue, with ones containing a computer starting with 't' shaded in orange.
+
+![Computers](./23-lan-party/screenshots/d23.png)

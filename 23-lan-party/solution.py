@@ -35,7 +35,7 @@ def render(G, triangles):
 
     plt.show()
 
-with open('test.txt', 'r') as file:
+with open('input.txt', 'r') as file:
     network_str = file.read()
 
 G = nx.Graph()
@@ -45,13 +45,24 @@ for computer1, computer2 in [line.split('-') for line in network_str.split('\n')
 
 triangles = [clique for clique in nx.enumerate_all_cliques(G) if len(clique) == 3]
 
-count = 0
+part1 = 0
 for tri in triangles:
     found = False
     for v in tri:
         if not found and v[0] == 't':
-            count += 1
+            part1 += 1
             found = True
-ic(count)
+ic(part1)
 
-render(G, triangles=triangles)
+# render(G, triangles=triangles)
+
+cliques = list(nx.find_cliques(G))
+largest_clique = max(cliques, key=len)
+ic(largest_clique)
+part2 = None
+for computer in sorted(largest_clique):
+    if part2 is None:
+        part2 = computer
+    else:
+        part2 += ',' + computer
+ic(part2)
