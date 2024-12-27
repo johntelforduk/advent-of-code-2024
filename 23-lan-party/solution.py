@@ -54,7 +54,7 @@ for tri in triangles:
             found = True
 ic(part1)
 
-# render(G, triangles=triangles)
+render(G, triangles=triangles)
 
 cliques = list(nx.find_cliques(G))
 largest_clique = max(cliques, key=len)
