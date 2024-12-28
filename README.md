@@ -9,6 +9,7 @@ pip install pygame
 pip install sympy
 pip install networkx
 pip install matplotlib
+pip install pydot
 ```
 
 ### Day 10: Hoof It
@@ -44,3 +45,9 @@ Graph that represents topology of numeric keypad.
 Render of the test computer network. Normal cliques of 3 shaded blue, with ones containing a computer starting with 't' shaded in orange.
 
 ![Computers](./23-lan-party/screenshots/d23.png)
+
+### Day 24: Crossed Wires
+
+Part of the logic gate diagram.
+
+![Gates](./24-crossed-wires/screenshots/d24.png)
