@@ -3,7 +3,11 @@
 
 from icecream import ic
 import networkx as nx
+from networkx.drawing.nx_pydot import to_pydot
+
 import matplotlib.pyplot as plt
+import pydot
+
 
 def add_non_space(d:dict, k, v):
     if v != ' ':
@@ -36,14 +40,14 @@ class Keypad:
                 if (x2, y2) in pad:
                     self.G.add_edge(pad[(x1, y1)],
                                     pad[(x2, y2)],
+                                    label=direction,
                                     direction=direction)
 
         self.pos = 'A'
 
     def render(self):
-        pos = nx.circular_layout(self.G)
-        nx.draw(self.G, pos, with_labels=True)
-        plt.show()
+        pydot_graph = to_pydot(self.G)
+        pydot_graph.write_png("screenshots/d21.png")  # Saves as an image file
 
     def press_one_key(self, current_key: str, target_key: str) -> list:
         paths = list(nx.all_shortest_paths(self.G, source=current_key, target=target_key))
@@ -85,6 +89,8 @@ numeric = Keypad(layout="""
     | 0 | A |
     +---+---+""")
 
+numeric.render()
+
 directional = Keypad(layout="""
     +---+---+
     | ^ | A |
@@ -92,7 +98,7 @@ directional = Keypad(layout="""
 | < | v | > |
 +---+---+---+""")
 
-with open('input.txt', 'r') as file:
+with open('test.txt', 'r') as file:
     code_str = file.read()
 
 total = 0
